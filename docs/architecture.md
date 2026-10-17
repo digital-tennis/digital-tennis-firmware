@@ -32,4 +32,13 @@ ctest --test-dir .work/build --output-on-failure
 
 ## 보드 통합 시 수행할 것
 
-팀의 Zephyr/NCS·툴체인 버전을 확정하고 west 환경에서 `west build -b nu40dk_kit/nrf52840 . -- -DDT_ZEPHYR_APP=ON -DDTC_OVERLAY_FILE=/absolute/reviewed/external.overlay`를 실행한다. 실제 외장 IMU 모델·전압·헤더·주소·지원 드라이버·장착 행렬을 검토해야 한다. 현재 결과는 **호스트 C 검사 통과**이며 Zephyr/NCS 보드 빌드·flash·실제 전파·OS페어링·센서 정확도는 확인하지 않았다. SDK가 확정되기 전 보드 빌드 성공으로 보고하지 않는다.
+검증 환경은 설치된 NCS3.4.1(LTS), Zephyr4.4.2, GNU14.3.0/Zephyr SDK1.0.1이다. 소스 커밋·컴파일러/도구 버전·ELF 해시·메모리 사용량은 `docs/board-build-validation.json`에 기록한다. 현재 SDK 스키마에 필요한 `board.yml.full_name`만 참고 보드에 추가했다. BLE 광고는 현재 API와 파일 수명의 payload를 사용하고 이름을 scan response에 분리해 광고 크기 한계를 지킨다.
+
+```sh
+python3 tools/build-board.py --sdk-root /absolute/ncs/v3.4.1 --toolchain /absolute/nordic/toolchain --protocol /absolute/checked/protocol
+python3 tools/build-board.py --sdk-root /absolute/ncs/v3.4.1 --toolchain /absolute/nordic/toolchain --protocol /absolute/checked/protocol --overlay tests/compile-fixtures/mpu6050.overlay --out .work/zephyr-external-compile
+```
+
+첫 빌드는 외장 alias가 없는 상태를 컴파일한다. 두 번째는 **컴파일 전용 합성 MPU6050 overlay**로 실제 Zephyr6축 API를 호출하는 드라이버 분기까지 컴파일한다. 모델/주소는 테스트 가정이며 제품의 센서/배선 결정이 아니다. 두 경로 모두 실물 연결·flash를 하지 않는다. 테스트 fixture를 플래시하지 않는다.
+
+실제 작업에는 검토한 overlay를 `--overlay`에 전달한다. 외장 IMU 모델·전압·헤더·주소·지원 드라이버·장착 행렬과 실제 보드 리비전은 여전히 검토가 필요하다. 보드 대상 빌드 성공은 실제 부팅·전파·OS페어링·센서 정확도 성공과 다르다. SDK 변경으로 캐시가 맞지 않으면 생성 빌드 폴더만 `--pristine`으로 재생성한다. Kconfig 경고를 무시하도록 바꾸지 않는다.

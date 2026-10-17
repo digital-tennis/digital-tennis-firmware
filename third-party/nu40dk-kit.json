@@ -4,5 +4,8 @@
   "copied": "firmware/10_xbox/nu40dk-kit-xbox/boards/baram/nu40dk_kit",
   "license": "MIT",
   "scope": "board definition only; application and peripheral GATT are authored for Digital Tennis",
-  "physicalBoardVerified": false
+  "physicalBoardVerified": false,
+  "localAdaptations": [
+    "Added board.yml full_name required by the current board schema"
+  ]
 }
