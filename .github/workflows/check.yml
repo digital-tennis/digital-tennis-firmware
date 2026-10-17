@@ -1,0 +1,10 @@
+name: External IMU software pipeline
+on: [push, pull_request]
+jobs:
+  host:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S . -B .work/build -DCMAKE_C_FLAGS='-fsanitize=address,undefined'
+      - run: cmake --build .work/build
+      - run: ctest --test-dir .work/build --output-on-failure

@@ -1,0 +1,7 @@
+/* Copy outside Git or create a reviewed board-specific overlay after confirming
+ * external sensor model, logic voltage, I2C/SPI bus, address and header pins.
+ * Use a Zephyr-supported sensor node with accel + gyro channels, then set:
+ * / { aliases { external-imu = &YOUR_EXTERNAL_SENSOR_NODE; }; };
+ * Do not point this alias to a board-integrated IMU. This file deliberately
+ * contains no invented pin number, model, compatible string or address.
+ */
