@@ -7,6 +7,10 @@ K_MUTEX_DEFINE(dt_app_mutex);
 extern bool dt_external_imu_read(void *context,dt_imu_sample *sample);
 int main(void){
  if(!dt_controller_init(&dt_app_controller,(dt_imu_port){NULL,dt_external_imu_read},dt_motion_defaults()))return -1;
+ #ifdef DT_BUTTON_PROFILE
+ dt_app_controller.input_profile=DT_INPUT_BUTTONS;
+ LOG_INF("Button profile: SW1 serve, SW2 forehand, SW3 backhand, SW4 skill; IMU unused.");
+ #endif
  dt_buttons_init();int error=dt_ble_start();if(error){LOG_ERR("BLE initialization failed: %d",error);return error;}
  LOG_INF("BLE link probe works without a sensor; external IMU calibration remains required for swings.");
  for(;;){

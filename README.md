@@ -98,3 +98,7 @@ python3 tools/build-board.py \
 ## 라이선스
 
 직접 작성한 코드·문서는 [Apache-2.0](LICENSE)입니다. [NOTICE](NOTICE)를 포함하며, 참고 보드 코드의 MIT 등 원래 조건은 [외부 코드 고지](THIRD_PARTY_NOTICES.md)를 따릅니다.
+
+### NU-54 버튼 입력 시험 모드
+
+NU-54 빌드는 SW1=서브, SW2=포핸드, SW3=백핸드, SW4=스킬을 v2 BUTTON4~7로 전송합니다. 외장 IMU는 사용하지 않으며 센서 준비·보정 flags는 거짓입니다. 본딩 후 LINK_REPLY.kind=1로 모드를 알리고, Unity의 세 입력 테스트 후 저장해야 경기에 적용됩니다. NU40-DK의 기존 외장 IMU 모드와 보정 절차는 유지합니다. 30ms 디바운스, 길게 누름 1회, 부팅 중 누른 버튼 제외와 eventId 기반 중복 제거가 적용됩니다. 스킬은 게임에서 실제 충전한 재고가 있어야 발동합니다.

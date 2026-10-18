@@ -10,7 +10,7 @@ typedef struct { uint8_t kind; float min_yaw,max_yaw,min_pitch,max_pitch,min_pea
 typedef struct {
  dt_imu_port imu;dt_motion_config config;
  bool ready,calibrated,calibrating,latched,has_time,swinging;
- uint8_t shot_mode; uint32_t swing_started; float yaw,pitch,peak,peak_y,peak_z;
+ dt_input_profile input_profile; uint8_t shot_mode; uint32_t swing_started; float yaw,pitch,peak,peak_y,peak_z;
  dt_motion_rule rules[8];unsigned rule_count;
  float bias[3],sum[3],filtered[3];unsigned samples;
  uint16_t sequence,event_id,command_id;uint32_t last_time,last_swing,calibration_started,status_at;

@@ -80,3 +80,7 @@ NU54 overlay는 현재 직접 실행 시험용이다. 원래 slot1의 사용하�
 Mac 일반 Unity 창의 clean 빌드에서 NU-54 실제 본딩·암호화·LINK_PROBE/REPLY와 보드 reset 후 본딩 재사용을 통과했다. 보안 진단은 L2/bonded/SC를 확인했고 센서 ready/calibrated는 false를 유지했다. 센서 없는 보정 요청은 실패하고 게임의 동작 테스트·저장은 차단됐다. reset은 저장영역 읽기·삭제·flash 없이 수행했다. [현재 기계 판독 결과](bonding-build-validation.json)를 확인한다.
 
 이 결과는 NU-54의 센서 없는 BLE 경계이며 NU40 실물 GPIO/BLE·외장 IMU 정확도·물리 Windows 검증을 대신하지 않는다. 최초 OS PIN/숫자 대조 팝업 조작을 확인한 것은 아니다. 이전 ATT15/SMP timeout은 당시 실패 기록으로 유지한다.
+
+## NU-54 버튼 전용 프로필
+
+NU54 보드 빌드만 DT_BUTTON_PROFILE을 명시합니다. vendored DTS의 SW1=P1.13, SW2=P1.09, SW3=P1.08, SW4=P0.04(active-low)를 앱 alias로 사용합니다. 순서대로 BUTTON4/5/6/7이며 메인 루프가 IMU 판정을 수행하지 않습니다. LINK_REPLY.kind=1이 현재 연결의 버튼 모드를 확인합니다. 센서 flags는0, power/각도는0이고 IMU 보정 요청은 실패 ACK입니다. NU40는 기존 alias·IMU 판정을 유지합니다. 키·설정 저장영역과 본딩 보안 정책은 변경하지 않습니다.
