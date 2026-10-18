@@ -51,6 +51,17 @@ int main(void){
  request=command(130,90);assert(dt_controller_command(&c,&request,f.value.time_ms,&p)&&p.type==131&&p.flags==0); // probe survives sensor loss
  f.available=true;step(&c,&f,0,0,&p);request=command(128,9);assert(!dt_controller_command(&c,&request,f.value.time_ms,&p));
  f.value.time_ms+=5001;assert(dt_controller_tick(&c,&p)&&p.type==129&&p.kind==3&&!c.calibrated);
+ // Button-only firmware announces its profile without inventing sensor flags.
+ dt_controller buttons;assert(dt_controller_init(&buttons,(dt_imu_port){&f,read_sample},config));
+ assert(!dt_controller_button(&buttons,DT_BUTTON_SERVE,0,&p));
+ buttons.input_profile=DT_INPUT_BUTTONS;
+ request=command(130,91);assert(dt_controller_command(&buttons,&request,10,&p)&&p.kind==DT_INPUT_BUTTONS&&p.flags==0);
+ for(uint8_t kind=DT_BUTTON_SERVE;kind<=DT_BUTTON_SKILL;kind++){
+  assert(dt_controller_button(&buttons,kind,10,&p)&&p.type==2&&p.kind==kind&&p.flags==0&&p.power==0&&dt_validate(&p)==DT_OK);
+ }
+ assert(!dt_controller_button(&buttons,8,10,&p));assert(!dt_controller_tick(&buttons,&p)&&!buttons.ready&&!buttons.calibrated);
+ assert(!dt_controller_intent(&buttons,8,10,&p));
+ request=command(128,92);assert(dt_controller_command(&buttons,&request,10,&p)&&p.kind==2&&!buttons.calibrated);
  config.axis[0]=2;assert(!dt_controller_init(&c,(dt_imu_port){&f,read_sample},config));
  puts("PASS: sensorless probe, independent buttons, calibration ACK/busy/idempotency, complete swings/directions, eight replay profiles, ambiguity/noise/gap/sensor loss and configuration checks");return 0;
 }

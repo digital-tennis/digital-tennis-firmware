@@ -15,7 +15,7 @@ bool dt_controller_init(dt_controller *c,dt_imu_port port,dt_motion_config confi
 }
 bool dt_controller_command(dt_controller *c,const dt_packet *command,uint32_t now,dt_packet *response){
  if(!c||!command||!response||dt_validate(command)!=DT_OK)return false;
- if(command->type==130){packet(c,response,131,0,now);response->event_id=command->event_id;return true;}
+ if(command->type==130){packet(c,response,131,(uint8_t)c->input_profile,now);response->event_id=command->event_id;return true;}
  if(command->type!=128)return false;
  if(c->calibrating){packet(c,response,129,1,now);response->event_id=command->event_id;return true;}
  for(unsigned i=0;i<c->history_count;i++){if(c->command_history[i]==command->event_id){packet(c,response,129,c->command_results[i],now);response->event_id=command->event_id;return true;}}
@@ -24,7 +24,7 @@ bool dt_controller_command(dt_controller *c,const dt_packet *command,uint32_t no
  c->calibrating=true;c->calibrated=false;c->latched=c->swinging=false;c->samples=0;c->calibration_started=now;memset(c->sum,0,sizeof(c->sum));return false;
 }
 bool dt_controller_button(dt_controller *c,uint8_t kind,uint32_t now,dt_packet *out){
- if(!c||!out||kind<1||kind>3)return false;
+ if(!c||!out||kind<1||kind>7||(kind>3&&c->input_profile!=DT_INPUT_BUTTONS))return false;
  packet(c,out,2,kind,now);out->event_id=++c->event_id;return true;
 }
 bool dt_controller_set_mode(dt_controller *c,uint8_t kind){
@@ -54,7 +54,7 @@ bool dt_controller_intent(dt_controller *c,uint8_t kind,uint32_t now,dt_packet *
  packet(c,out,1,kind,now);out->event_id=++c->event_id;out->power=50;return true;
 }
 bool dt_controller_tick(dt_controller *c,dt_packet *out){
- if(!c||!out)return false;
+ if(!c||!out||c->input_profile==DT_INPUT_BUTTONS)return false;
  dt_imu_sample s={0};bool valid=c->imu.read(c->imu.context,&s)&&finite_sample(&s);
  if(!valid){bool changed=c->ready;c->ready=c->calibrated=c->swinging=false;if(c->calibrating){c->calibrating=false;ack(c,out,3,c->last_time);remember(c,3);return true;}if(changed){packet(c,out,3,0,c->last_time);return true;}return false;}
  uint32_t elapsed=c->has_time?(uint32_t)(s.time_ms-c->last_time):0;
