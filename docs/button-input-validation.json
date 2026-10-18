@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-19",
+  "passed": true,
+  "scope": "Real human NU54 GPIO buttons -> encrypted bonded BLE -> v2 packet codec -> SDK -> ordinary Unity adapter/game rules; no IMU validation",
+  "hardware": "NU54 without IMU; product target remains NU40-DK + external IMU",
+  "normalWindow": true,
+  "gameSource": "78d609614e57b4680305e64016c9915371d1e7a4",
+  "protocolSource": "a1bcb6496c88e14fbfc56d3aa27e96f38dab25c9",
+  "sdkSource": "7e960850ad473fe0d990cdde43156423669f9277",
+  "firmwareRuntimeSource": "27e5a224a0027f243426e6e116cdf0bee381e41c",
+  "buttonMapping": {
+    "SW1": "Serve",
+    "SW2": "Forehand",
+    "SW3": "Backhand",
+    "SW4": "Skill"
+  },
+  "actualSetupInputs": [
+    "Serve",
+    "Forehand",
+    "Backhand",
+    "Skill"
+  ],
+  "calibrated": false,
+  "buttonModeExplicitlyNegotiated": true,
+  "savedOnlyAfterActualTest": true,
+  "actualServe": true,
+  "actualForehandHits": 7,
+  "actualBackhandHits": 2,
+  "actualNearSkillActivations": 2,
+  "skillStockNaturallyEarned": true,
+  "grantStockOrPhysicsInjection": false,
+  "mockTransportUsedForPhysicalEvidence": false,
+  "keyboardUsedForGameplay": false,
+  "settingsGameplayHitsAndPoints": 0,
+  "runtimeExceptions": 0,
+  "tests": {
+    "protocolCrossLanguageCases": 2065,
+    "sdkChecks": 58,
+    "firmwareHostSuites": 2,
+    "boardBuilds": [
+      "NU40",
+      "NU54"
+    ],
+    "offlineInstallerGuards": "passed",
+    "unityEditPassed": 190,
+    "unityControllerScenePassed": 2,
+    "unityPlayPassed": 44,
+    "unityPlaySkippedNullGpu": 1
+  },
+  "imuValidation": "deferred",
+  "notVerified": [
+    "NU40 physical switches/IMU",
+    "Windows physical BLE",
+    "two-PC/WAN"
+  ],
+  "appLeftPaused": true,
+  "evidence": {
+    "connected-buttons.png": "37f002d1fccc19fbd574314e961a9702930dd4ff0544a283aa360775296b088e",
+    "connected-buttons.json": "825d3a247288fff7ba165a26564b5b72d9ed751b6791f3bed1027527f9f61f6c",
+    "four-buttons-tested.png": "dbb587ab4f8cece1361933f47e67ab1da2dd019792b7ee2191c445581f32be1e",
+    "four-buttons-tested.json": "2b0c2837e6bfdcaa146d776fd77f968f4f311fbb9bb99965d97a72346f89742a",
+    "button-serve.png": "96d1381741b943afca1cc550d562905e8615655a38960e5a57c6179b3b8e97c8",
+    "button-serve.json": "c199e065294c92825de33c566a2cda4e03555062e234904e57c99300ceef8736",
+    "button-forehand.png": "c382ddcae06eb65e8a7ee3b4276df8fc37529bdd9c0539ca5217322545acfe5b",
+    "button-forehand.json": "4a96bdfd59929555dee899d3482cf8db48fe56aaa36781dd79f4ce0e12de543d",
+    "button-backhand.png": "e04ccecdac04932a2073e12131bdad010a214e2fb3712c6a68f744dd980240da",
+    "button-backhand.json": "abfdaeac4b782ea5e1bea5723733729766b96de14363d00bdbcb6bb60e324b65",
+    "button-skill.png": "f48a74e20b99017cdd79efc080201d440d4b48fdcbfd61f9927b5e2e0e444d3b",
+    "button-skill.json": "bd343a03323fa99affa664adcff962067ddb64322ebc21b502e03b072a13a445"
+  }
+}
