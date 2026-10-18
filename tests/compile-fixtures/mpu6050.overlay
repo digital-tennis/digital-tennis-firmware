@@ -1,0 +1,12 @@
+/* COMPILE ONLY. Synthetic model/address; not a wiring or product choice.
+ * Never flash this fixture or treat it as proof of an attached sensor. */
+/ {
+    aliases { external-imu = &compile_only_imu; };
+};
+&i2c0 {
+    compile_only_imu: validation-imu@68 {
+        compatible = "invensense,mpu6050";
+        reg = <0x68>;
+        status = "okay";
+    };
+};

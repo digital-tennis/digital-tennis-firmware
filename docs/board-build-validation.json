@@ -1,0 +1,56 @@
+{
+  "scope": "Compile/link only; no probe, flash, physical board, radio or IMU execution. Synthetic external-sensor fixture is not a product model/address selection.",
+  "ncs": "3.4.1 LTS",
+  "zephyr": "4.4.2",
+  "compiler": "GNU 14.3.0",
+  "toolchainSdk": "1.0.1",
+  "toolchainBundle": "ccc010f809",
+  "sdkSourceCommits": {
+    "nrf": "b20f8619ba9a5530f8c34b0a130d829947cfe55d",
+    "zephyr": "33fa6a7aac6a4401d16a67cb9f27a3483fa02dd6"
+  },
+  "toolchainManifestSha256": "bfbfcbfc143b8794368f36a13d6f4645d22e03f2af2122809f1a79cbb9016d95",
+  "board": "nu40dk_kit/nrf52840",
+  "variants": {
+    "no-external-sensor": {
+      "elfSha256": "240fcbc228063e8f357dbfeca08c34f5887eaf3882b3b3483fbf5efc01c77507",
+      "hexSha256": "47e1829692bbd66bf7b66316e7f21d706cba2ff8853eed446e3f3c99b9baa9fc",
+      "flashBytes": 175696,
+      "ramBytes": 33932,
+      "mpu6050DriverCompiled": false,
+      "physicalRun": false
+    },
+    "synthetic-external-driver": {
+      "elfSha256": "08ebb72eed07832b7d8533eb32f3787a05ddb2979d6368a7314dcfd8a609dcb7",
+      "hexSha256": "6bcc1fc0acfa129d3269260970bb5521c672669dd8ced24671548ab3397acd85",
+      "flashBytes": 179796,
+      "ramBytes": 33996,
+      "mpu6050DriverCompiled": true,
+      "physicalRun": false
+    }
+  },
+  "sourceHashes": {
+    "src/main.c": "79a927a9f79933aea70006c51c9866dfcfa474b8099518a9e4df7ad24bef8327",
+    "src/hw/driver/external_imu.c": "48a56e8d9a013ff5354185cf336688fd750ab4e51b44970dcbeec0d861099802",
+    "src/ap/ble_peripheral.c": "2ab527c2647efdca4432dc2873d70c99093374b3d5a5d80ede1684698204a4c3",
+    "src/ap/dt_controller.c": "4f652d1ec66f69c088fac0ccd4355d3751d4fd2f69746cb60bf16857ac9d042c",
+    "src/common/dt_controller.h": "940cd8dd82c16beb0314624785ec3d99b929c2c6016af38231aa61b2a460f4ff",
+    "boards/baram/nu40dk_kit/nu40dk_kit.dts": "6c970fdc46780e82e63c5fe59583ce6a87d97c1e187d0754ed9efdd7f32f3137",
+    "boards/baram/nu40dk_kit/pre_dt_board.cmake": "32322cc2a4a119c4c625927979ba027e498f06f824dcbb91f57585862e9b9b0d",
+    "boards/baram/nu40dk_kit/nu40dk_kit_defconfig": "8f535222600c600e4542ad83f748dc0f37a9ef44e8cc251676c59c17b8fb9989",
+    "boards/baram/nu40dk_kit/board.yml": "2b336b1c0fc372841d9eb18d47d67d31a79786b4e330dc3211da39c96e658e15",
+    "boards/baram/nu40dk_kit/nu40dk_kit-pinctrl.dtsi": "6b34f57b7809d31a865e0755135a1f44480204e31095f35fa55ee0ed2d357d20",
+    "boards/baram/nu40dk_kit/nu40dk_kit.yaml": "fdc77a1ad0fed06de3bef95ef85cd2630ddd341cf89c1c61b29e96451c76de59",
+    "boards/baram/nu40dk_kit/Kconfig.nu40dk_kit": "5b43aebff0271fabb00be03d8d881cdee5e882879d4885ea380d42b099503c33",
+    "boards/baram/nu40dk_kit/board.cmake": "fbf77ca79859c7a3fd425bd3552784ee39d65a964fcae52ef71d099b3addf5d2",
+    "tests/compile-fixtures/README.md": "03827f58587fd9c08262c911083e82bfcd4709ac6ce2a57b6b5b891a881803a1",
+    "tests/compile-fixtures/mpu6050.overlay": "e729271a2ccb808e190e91b12c9caaa6074d4408cfa7d43bcdfe5e97278cf563",
+    "tools/build-board.py": "0d8c202c9224af0edd81773f87ceb7e60362c241e55a080fa6ac37ac7e45acda",
+    "CMakeLists.txt": "9f2a9b741bb43cf259f4e679c835c593700f0772e413138a6889e68babb80076",
+    "prj.conf": "1cd33f1735a3b1c36ead31b7a7c26f54b9042666c2d35537378a87fc7aaa16cf"
+  },
+  "sdkSourceDirty": {
+    "nrf": false,
+    "zephyr": false
+  }
+}

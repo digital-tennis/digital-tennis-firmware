@@ -1,0 +1,6 @@
+board:
+  name: nu40dk_kit
+  full_name: NU40-DK Kit
+  vendor: baram
+  socs:
+    - name: nrf52840

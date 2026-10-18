@@ -1,0 +1,11 @@
+{
+  "url": "https://github.com/chcbaram/nu40dk-kit",
+  "commit": "df4367ed03d35c8599dc6007f049b2f4df9812b3",
+  "copied": "firmware/10_xbox/nu40dk-kit-xbox/boards/baram/nu40dk_kit",
+  "license": "MIT",
+  "scope": "board definition only; application and peripheral GATT are authored for Digital Tennis",
+  "physicalBoardVerified": false,
+  "localAdaptations": [
+    "Added board.yml full_name required by the current board schema"
+  ]
+}
