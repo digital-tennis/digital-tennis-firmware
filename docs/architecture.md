@@ -7,18 +7,20 @@ boards/baram/nu40dk_kit    참조 보드 정의(실물 리비전과 일치 여�
 overlays/                사용자가 확인할 별도 센서·배선 설정
 src/hw/driver/           외장 IMU 포트: Zephyr sample_fetch/accel/gyro
 src/common/              SI 가속도/deg/s 샘플, 설정, 포트 계약
-src/ap/dt_controller.c   정지 영점·필터·기본스윙·명령 상태
-src/ap/ble_peripheral.c  서비스/구독/암호화된 Write/Notify
-src/main.c               100Hz 취득과 조립(단일 앱 루프)
+src/ap/dt_controller.c   정지 영점·스윙 구간·상대각·선택/규칙 분류·명령 상태
+src/ap/ble_peripheral.c  서비스/구독/암호화된 Write/Notify·bond 저장
+src/ap/dt_tx_queue.c     32개 큐·기한·재전송·연결 세대
+src/ap/dt_button.c       30ms debounce·부팅 때 누른 버튼 제외
+src/main.c               100Hz 취득/버튼·명령 처리와 독립 TX worker
 protocol pinned SHA      공통20바이트 코덱
 tests/                   실물 없는 가짜 센서·실패 조건 검사
 ```
 
 센서 장착은 확인된 overlay의 `external-imu` alias로만 연결한다. alias가 없거나 장치 미준비·샘플 오류이면 ready/calibrated를 거짓으로 두고 스윙을 만들지 않는다. 내장 센서로 대체하지 않는다. Zephyr 센서 드라이버의 가속도는m/s², 각속도rad/s는deg/s로 변환한다. 장착 행렬·왼손 처리·필터·임계값은 `dt_motion_config` 주입값이다. 기본값은 **초기 소프트웨어 시험값**이고 실물 인식률 근거가 아니다.
 
-CALIBRATE는 정지 상태64개 샘플로 gyro bias를 구한다. 움직이면 연속 표본을 다시 모으며5초에 실패한다. 진행 중에는BUSY, 완료된 명령ID는최근64개 결과를 재사용한다. 센서 실패·시간 불연속·끊김은 보정을 무효화한다. 필터된 각속도의 히스테리시스·200ms 초기 cooldown으로 한 스윙의 반복 검출을 막는다. FH/BH/위쪽서브는 최소 분류기이며 방향 적분·정밀 자세 추적은 구현하지 않아 yaw/pitch는0으로 보낸다. v2의 추가 샷/스킬은 상위 버튼·제스처 정책이 `dt_controller_intent`에 명시적으로 요청하는 경계다. 실제8제스처 인식 성공을 의미하지 않는다.
+CALIBRATE는 정지 상태64개 샘플로 gyro bias를 구한다. 움직이면 연속 표본을 다시 모으며5초에 실패한다. 진행 중에는BUSY, 완료된 명령ID는최근64개 결과를 재사용한다. 센서 실패·시간 불연속·끊김은 보정을 무효화한다. 필터된 각속도의 히스테리시스·cooldown으로 스윙 시작→최고 속도 관찰→release를 구분한다. 최소20ms·최대1000ms 구간과100ms 샘플 공백 기준은 주입 설정으로 조절한다. 스윙 구간의 yaw/pitch 상대 회전량과 최고 속도 기반 power를 전송하며 절대 위치/전역 방향을 추정하지 않는다. 기본 자동 분류는 FH/BH/서브다. 특수샷은 명시적 모드 선택으로 구분하고, `dt_controller_set_rules`는 각도/최고속도/시간 범위의 최대8개 녹화 기반 프로필을 주입한다. 프로필의 미일치/모호한 겹침은 입력을 만들지 않는다. 테스트의8개 프로필은 합성 입력이며 실제 사람 제스처 정확도 주장이 아니다. 실제 장착 데이터로 프로필과 임계값을 정해야 한다.
 
-암호화된CCC 구독과명령Write, 보정 완료 상태를 사용한다. GATT write 성공과 보정 ACK 성공은 다르다. 연결 종료 시 보정과 명령 이력을 폐기하고 광고를 재시작한다. 영구 bond 저장 정책은 실제 제품 플래시/보안 요구와 함께 확정해야 하며 현재 RAM 연결만 다룬다. 배터리 측정은 구현하지 않아255(미측정)를 보낸다.
+암호화된CCC 구독과명령Write, 보정 완료 상태를 사용한다. GATT write 성공과 보정 ACK 성공은 다르다. 연결 종료 시 보정과 명령 이력을 폐기하고 광고를 재시작한다. 참고 NU-54의 연결 ref/실제 구독 확인/순차 송신/BT settings 패턴을 적용했다. NVS의 기존 BT bond를 부팅 때 로드하며 자동 초기화하지 않는다. 기존 참고 보드의 펌웨어와 테니스 펌웨어는 별도 제품이다. 배터리 측정은 구현하지 않아255(미측정)를 보낸다.
 
 ## 장비 없이 실행
 
@@ -42,3 +44,13 @@ python3 tools/build-board.py --sdk-root /absolute/ncs/v3.4.1 --toolchain /absolu
 첫 빌드는 외장 alias가 없는 상태를 컴파일한다. 두 번째는 **컴파일 전용 합성 MPU6050 overlay**로 실제 Zephyr6축 API를 호출하는 드라이버 분기까지 컴파일한다. 모델/주소는 테스트 가정이며 제품의 센서/배선 결정이 아니다. 두 경로 모두 실물 연결·flash를 하지 않는다. 테스트 fixture를 플래시하지 않는다.
 
 실제 작업에는 검토한 overlay를 `--overlay`에 전달한다. 외장 IMU 모델·전압·헤더·주소·지원 드라이버·장착 행렬과 실제 보드 리비전은 여전히 검토가 필요하다. 보드 대상 빌드 성공은 실제 부팅·전파·OS페어링·센서 정확도 성공과 다르다. SDK 변경으로 캐시가 맞지 않으면 생성 빌드 폴더만 `--pristine`으로 재생성한다. Kconfig 경고를 무시하도록 바꾸지 않는다.
+
+## 센서 없는 BLE 확인·송신 안정화
+
+LINK_PROBE(130)는 센서 준비/보정과 독립적으로 LINK_REPLY(131)를 돌려준다. 실제 ready/calibrated flags는 그대로이며 보정·스윙·설정 저장을 만들지 않는다. BLE Write callback은 검증한 명령을8개 큐에 넣고 즉시 반환한다. 센서 루프와 별도의 송신 worker는32개 큐에서 제어/스윙/버튼을3회 전송하며, 같은 eventId/원래 deviceTimeMs와 매 전송 새 sequence를 사용한다. STATUS는1회다. 일시적인 송신 실패는20ms 뒤 재시도하고 입력200ms/제어1000ms 기한을 넘기면 폐기한다. 가득 찬 큐의 가장 오래된 항목을 버리고 drop 수를 보존한다. 수신/송신 작업의 연결 세대를 검사하고 구독 변경·단절 시 큐를 비운다.
+
+## 버튼과 샷 선택
+
+`racket-confirm/start/pause/skill/shot` alias를 실제로 검토한 overlay에 지정한다. alias가 없으면 GPIO를 읽지 않는다.30ms 안정 상태 뒤 눌림1회만 확정하고 부팅 때 이미 눌린 버튼은 놓을 때까지 무시한다. confirm/start/pause는 BUTTON1/2/3, skill은 준비·보정 후 SWING8이며 shot은 자동→스매시→발리→슬라이스→로브→자동을 순환한다. 실제 스윙은 선택 모드의 kind와 측정된 상대각·세기를 사용한다. 배선/active-low는 실물 확인 후 결정한다. 배터리255는 계속 미측정 값이다.
+
+참고 제품의 확인 커밋은 `ee12b7519336ed276060b83c69f4f863f557443a`이며 `p01-device-firmware/app/src/ble_links.c`와 `p05-operations-backoffice/internal/ble/central.go`의 연결 패턴만 참고했다. 지갑/결제/프로비저닝 데이터나 기능은 본 제품에 포함하지 않는다.

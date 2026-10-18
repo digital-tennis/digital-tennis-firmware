@@ -1,0 +1,3 @@
+/* Compile-only alias fixture. Not verified wiring; NEVER FLASH. */
+#include "mpu6050.overlay"
+/ { aliases { racket-confirm = &btn0; racket-start = &btn1; racket-pause = &btn2; racket-skill = &btn3; racket-shot = &btn0; }; };

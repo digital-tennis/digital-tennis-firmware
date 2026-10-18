@@ -35,3 +35,7 @@ NU40-DK에 별도로 부착한 IMU의 데이터 획득, 보정, 스윙 인식, B
 - [모든 제품과 의존 관계](https://github.com/digital-tennis/digital-tennis-docs/blob/main/docs/project/repositories.md)
 
 라이선스는 코드와 제3자 자산 조건을 검토한 뒤 팀이 선택합니다.
+
+## 송신·버튼·모션 및 센서 없는 통신 확인
+
+32개 송신 큐와 기한/재전송,30ms 버튼 튐 제거, 스윙 시작→최고속도→release와 상대각/세기, 최대8개 녹화 프로필 규칙을 제공합니다. 기본 자동 분류는FH/BH/서브이며 특수샷은 선택 모드나 검증된 프로필을 사용합니다. LINK_PROBE/REPLY는 센서 없이 연결·송수신을 확인하며 보정·게임 준비를 만들지 않습니다. 실제 배선/GPIO/사람 인식률은 유예합니다. [구조와 연결 절차](docs/architecture.md), [이번 호스트·보드3구성 컴파일 기록](docs/controller-refinement-validation.json)을 확인하세요. 합성 overlay는 실제 보드에 올리지 않습니다.
