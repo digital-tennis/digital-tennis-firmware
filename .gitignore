@@ -5,3 +5,7 @@ build/
 .work/
 build/
 .venv/
+
+# Local Python build/installer cache
+__pycache__/
+*.py[cod]

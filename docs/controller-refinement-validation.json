@@ -1,0 +1,60 @@
+{
+  "scope": "Compile/host replay only; no physical IMU or firmware flash. Existing NU54 BLE link evidence is recorded separately.",
+  "protocolCommit": "d9a36826afbafa27a0e276cc53e44c904d05be53",
+  "hostTests": {
+    "passed": 2,
+    "failed": 0,
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "defaultPinnedFetch": true
+  },
+  "board": "nu40dk_kit/nrf52840",
+  "ncs": "3.4.1",
+  "zephyr": "4.4.2",
+  "variants": {
+    "sensorless": {
+      "elfSha256": "62780b4a240eab96f9026c57d24ad9d1d84ab4fdce8bc08b74afe111f876949c",
+      "hexSha256": "f6e77c8b2266234e830d6d01b4721503dc30e808e6c3f3bc55cfa482ddef637d",
+      "flashBytes": 194900,
+      "ramBytes": 39276,
+      "physicalRun": false
+    },
+    "synthetic-external": {
+      "elfSha256": "089d20408a70e365892bd4e07b4e12ab5136a856b8fd41432e362bff955027f5",
+      "hexSha256": "710da14077f23e9c2586bc5533fe780b851632252825903aad6e0bfbef0005a7",
+      "flashBytes": 198992,
+      "ramBytes": 39276,
+      "physicalRun": false
+    },
+    "synthetic-buttons-external": {
+      "elfSha256": "7b4d4c05d1ebc5127a4463d497abeb92cfa3f48f876caedad224330f207370ae",
+      "hexSha256": "3bf9eca0eb8fb9e04d18c12f587a793f6eda902bbcf0a2689fb17a12a73d13c0",
+      "flashBytes": 198992,
+      "ramBytes": 39276,
+      "physicalRun": false
+    }
+  },
+  "sources": {
+    "src/main.c": "57873488280d76587a2355d64549e9d80a4ed35d4e446c54a213d8701683bc84",
+    "src/hw/driver/external_imu.c": "48a56e8d9a013ff5354185cf336688fd750ab4e51b44970dcbeec0d861099802",
+    "src/hw/driver/buttons.c": "9f68309a6d177f5ac449f973c89361e1b13edcf3eea496d54b120e46a89601bf",
+    "src/ap/ble_peripheral.c": "a998ab81c0f61863ffaea222cfcb22570a30f36149988effdd8316367f23d5ae",
+    "src/ap/dt_controller.c": "4ec4ded7359bd79fcf370f072b8a07c6255b463c75f97c31cbe9fcc7783dc198",
+    "src/ap/dt_button.c": "e7c411c570465021f173148403d2050ba95cf420a722c1e14d4c32053de2cf78",
+    "src/ap/dt_tx_queue.c": "76235275cf7bd217c43d569c0ae17ffc6c5a01cbdb727e372ae323d3a256a95c",
+    "src/common/dt_ble.h": "02cac1fe8f809a2f229b8ab37bebfbddac6107da97dec862dc45152728b3aab3",
+    "src/common/dt_tx_queue.h": "2e7e3d8640b78349a40e695eca4893496fe552f380a02e90e357784d46c57a46",
+    "src/common/dt_button.h": "8dfe1eeae6e8e826297db82c470efd7e4aba729dbb391f2a99d2ddb228362d30",
+    "src/common/dt_controller.h": "ec00a47c961ad17cc0bd93f3fba3e8c26e20b874f0cb50e59e7afc6311b0c0b0",
+    "tests/transport_checks.c": "144f23e82e7c425929be4bad1218143d129c07b95cbb94429c8a8009c0e48054",
+    "tests/controller_checks.c": "054d78a02ef87538b388be0cc3bc23fe29dc92ebc7d4fd97712ef1256eb581fb",
+    "tests/compile-fixtures/buttons.overlay": "eb5e7930f6ae6bbe8af97e67e2feb27fe26800d4ba506c8539191cd1dbd73353",
+    "tests/compile-fixtures/README.md": "f4d29b0522e7094e437e9f7bc4c46ef9359d1cb871def165cb1c800219be3a81",
+    "tests/compile-fixtures/mpu6050.overlay": "e729271a2ccb808e190e91b12c9caaa6074d4408cfa7d43bcdfe5e97278cf563",
+    "CMakeLists.txt": "5a9d52c9cc6c09236c19be99fc5702ca436bef54ba19d00553c05751b633a2c6",
+    "prj.conf": "bee72a56e8d1a7d5629a7cd72dff238eb5f868c61972af84a0ec3bc0de3ce9ce"
+  },
+  "rebuildNote": "A warm NCS-generated extra_kconfig_options cache had malformed quoted config strings. Recreated only generated directories with --pristine; did not suppress Kconfig warnings."
+}

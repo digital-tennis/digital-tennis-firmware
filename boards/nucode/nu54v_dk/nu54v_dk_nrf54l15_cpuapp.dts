@@ -1,0 +1,262 @@
+/*
+ * NU54-DK (NUCODE) - nRF54L15 Application core
+ * 회로도: hardware/NU54_DK_2026-07-13T15_16_09_UTC_SCH.pdf (Variant NU-54DK-C)
+ */
+
+/dts-v1/;
+
+#include <nordic/nrf54l15_cpuapp.dtsi>
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/adc/nrf-saadc.h>
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include "nu54v_dk-pinctrl.dtsi"
+
+/ {
+	compatible = "nucode,nu54v_dk-nrf54l15-cpuapp";
+	model = "NUCODE NU54-DK nRF54L15 Application MCU";
+
+	chosen {
+		zephyr,console = &uart20;
+		zephyr,shell-uart = &uart20;
+		zephyr,uart-mcumgr = &uart20;
+		zephyr,sram = &cpuapp_sram;
+		zephyr,flash = &cpuapp_rram;
+		zephyr,flash-controller = &rram_controller;
+		zephyr,code-partition = &slot0_partition;
+	};
+
+	/* LED1~4 : LEDx → NC7WZ17 버퍼 → NPN(EMH60) → LED, High = ON */
+	leds {
+		compatible = "gpio-leds";
+
+		led0: led_0 {
+			gpios = <&gpio2 9 GPIO_ACTIVE_HIGH>;
+			label = "LED1";
+		};
+
+		led1: led_1 {
+			gpios = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+			label = "LED2";
+		};
+
+		led2: led_2 {
+			gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;
+			label = "LED3";
+		};
+
+		led3: led_3 {
+			gpios = <&gpio1 14 GPIO_ACTIVE_HIGH>;
+			label = "LED4";
+		};
+	};
+
+	/* SW1~4 : 스위치 → GND, 외부 풀업 없음 → 내부 풀업 사용, Low = 눌림 */
+	buttons {
+		compatible = "gpio-keys";
+
+		button0: button_0 {
+			gpios = <&gpio1 13 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "SW1";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+
+		button1: button_1 {
+			gpios = <&gpio1 9 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "SW2";
+			zephyr,code = <INPUT_KEY_1>;
+		};
+
+		button2: button_2 {
+			gpios = <&gpio1 8 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "SW3";
+			zephyr,code = <INPUT_KEY_2>;
+		};
+
+		button3: button_3 {
+			gpios = <&gpio0 4 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "SW4";
+			zephyr,code = <INPUT_KEY_3>;
+		};
+	};
+
+	/*
+	 * ADC 채널 (프로젝트 overlay 에서 &adc 를 okay 로 켠다)
+	 *   VBAT : P1.12 (AIN5), VBAT ─ R8 470K ─┬─ 핀, └─ R11 1M ─ GND
+	 *          분압비 1M/(470K+1M) = 0.680 → 배터리 전압 = 읽은 값 × 1.470
+	 */
+	zephyr,user {
+		io-channels = <&adc 5>;
+		io-channel-names = "vbat";
+
+		/*
+		 * PMIC (BQ25186) 신호. 모두 솔더 브리지로 연결되어 있다.
+		 *   INT : /INT  open drain, 10K 풀업 (SB1)
+		 *   PG  : /PG   입력 전원 있음 (SB2)
+		 *   CE  : /CE   충전 허용. R10 10K 풀다운 → 띄워 두면 충전 허용 (SB3)
+		 */
+		pmic-int-gpios = <&gpio1 11 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+		pmic-pg-gpios  = <&gpio2 8 GPIO_ACTIVE_LOW>;
+		pmic-ce-gpios  = <&gpio2 10 GPIO_ACTIVE_LOW>;
+	};
+
+	aliases {
+		led0 = &led0;
+		led1 = &led1;
+		led2 = &led2;
+		led3 = &led3;
+		sw0 = &button0;
+		sw1 = &button1;
+		sw2 = &button2;
+		sw3 = &button3;
+		mcuboot-led0 = &led0;
+		mcuboot-button0 = &button0;
+		watchdog0 = &wdt31;
+	};
+};
+
+/*
+ * 보존 RAM 4 KB : SRAM 마지막 4 KB 를 떼어 리셋과 System OFF 에서도 내용을 남긴다.
+ * (Zephyr 의 sys_poweroff() 가 다른 RAM 의 리텐션은 끄고 이 영역만 유지한다)
+ * rtc 모듈이 기준 시각과 시간대를 여기에 둔다. 앱 RAM 은 256 KB → 252 KB 가 된다.
+ */
+/ {
+	sram_retained: memory@2003f000 {
+		compatible = "zephyr,memory-region", "mmio-sram";
+		reg = <0x2003f000 DT_SIZE_K(4)>;
+		zephyr,memory-region = "RetainedMem";
+		status = "okay";
+
+		retainedmem0: retainedmem {
+			compatible = "zephyr,retained-ram";
+			status = "okay";
+		};
+	};
+
+	aliases {
+		retainedmemdevice = &retainedmem0;
+	};
+};
+
+&cpuapp_sram {
+	status = "okay";
+	reg = <0x20000000 DT_SIZE_K(252)>;
+	ranges = <0x0 0x20000000 0x3f000>;
+};
+
+/* 32.768kHz 크리스탈 Y1 : P1.00/P1.01 (SB18/SB19), 외부 부하 커패시터 C1/C2 13pF */
+&lfxo {
+	load-capacitors = "external";
+};
+
+/* 32MHz HFXO 는 모듈(NCRB54N01VC) 내부 - nRF54L15 DK 기본값 사용 */
+&hfxo {
+	load-capacitors = "internal";
+	load-capacitance-femtofarad = <15000>;
+};
+
+/*
+ * 전원: 모듈 내부 DC/DC 인덕터 실장 여부 미확인 → 기본(LDO) 모드 유지.
+ * 확인 후 DC/DC 사용 시:
+ *   &regulators { status = "okay"; };
+ *   &vregmain { status = "okay"; regulator-initial-mode = <NRF5X_REG_MODE_DCDC>; };
+ */
+
+&grtc {
+	owned-channels = <0 1 2 3 4 5 6 7 8 9 10 11>;
+	/* Channels 7-11 reserved for Zero Latency IRQs, 3-4 for FLPR */
+	child-owned-channels = <3 4 7 8 9 10 11>;
+	status = "okay";
+};
+
+&clock {
+	status = "okay";
+};
+
+/*
+ * 버튼 핀은 GPIO SENSE 로 엣지 검출 (GPIOTE IN 채널 대신) → 대기 전류가 거의 없고 System OFF 깨우기에도 쓴다.
+ *   gpio0 : P0.04 (SW4)
+ *   gpio1 : P1.08 (SW3), P1.09 (SW2), P1.13 (SW1)
+ */
+&gpio0 {
+	status = "okay";
+	sense-edge-mask = <(BIT(4))>;
+};
+
+&gpio1 {
+	status = "okay";
+	sense-edge-mask = <(BIT(8) | BIT(9) | BIT(13))>;
+};
+
+&gpio2 {
+	status = "okay";
+};
+
+&gpiote20 {
+	status = "okay";
+};
+
+&gpiote30 {
+	status = "okay";
+};
+
+&radio {
+	status = "okay";
+};
+
+&temp {
+	status = "okay";
+};
+
+/* VCOM1 - 콘솔 */
+&uart20 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart20_default>;
+	pinctrl-1 = <&uart20_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* CONFIG_PM_DEVICE_RUNTIME=y 일 때 사용하지 않는 동안 자동 suspend (저전력) */
+	zephyr,pm-device-runtime-auto;
+};
+
+/* VCOM0 - 필요 시 오버레이에서 status = "okay" */
+&uart30 {
+	current-speed = <115200>;
+	pinctrl-0 = <&uart30_default>;
+	pinctrl-1 = <&uart30_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* CONFIG_PM_DEVICE_RUNTIME=y 일 때 사용하지 않는 동안 자동 suspend (저전력) */
+	zephyr,pm-device-runtime-auto;
+};
+
+/* Qwiic(J5) + PMIC(BQ25186, 0x6A) - I2C 예제에서 status = "okay" */
+&i2c21 {
+	clock-frequency = <I2C_BITRATE_FAST>;
+	pinctrl-0 = <&i2c21_default>;
+	pinctrl-1 = <&i2c21_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* CONFIG_PM_DEVICE_RUNTIME=y 일 때 사용하지 않는 동안 자동 suspend (저전력) */
+	zephyr,pm-device-runtime-auto;
+};
+
+/*
+ * SAADC. 분압기 출력 임피던스가 320 kΩ (470K ‖ 1M) 이라 기본 획득시간(10 us)으로는
+ * 값이 낮고 흔들린다 → 40 us + 하드웨어 오버샘플링 16회.
+ * 입력 최대 4.2 V × 0.68 = 2.86 V, gain 1/4 + 내부기준 0.9 V → 풀스케일 3.6 V.
+ */
+&adc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@5 {
+		reg = <5>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 40)>;
+		zephyr,input-positive = <NRF_SAADC_AIN5>;
+		zephyr,resolution = <12>;
+		zephyr,oversampling = <4>;
+	};
+};
+
+/* 메모리맵: docs/01_memory_map.md */
+#include <vendor/nordic/nrf54l15_cpuapp_partition.dtsi>

@@ -7,5 +7,14 @@
   "physicalBoardVerified": false,
   "localAdaptations": [
     "Added board.yml full_name required by the current board schema"
-  ]
+  ],
+  "gpioReference": "firmware/10_xbox/nu40dk-kit-xbox/src/hw/driver/button.c",
+  "applicationOverlay": "boards/nu40dk_kit_nrf52840.overlay",
+  "buttonPins": {
+    "confirm": "P0.31",
+    "start": "P1.07",
+    "pause": "P1.06",
+    "skill": "P1.05"
+  },
+  "activeLevel": "LOW, from upstream _DEF_LOW; application uses GPIO_ACTIVE_LOW|GPIO_PULL_UP"
 }

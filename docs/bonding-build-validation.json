@@ -1,0 +1,127 @@
+{
+  "date": "2026-10-19",
+  "scope": "Software build, installed code and actual NU54 encrypted bond/link/reset reuse in normal Unity game",
+  "primaryHardware": "NU40-DK + separately attached external IMU",
+  "protocolCommit": "12dae689fd9b25187426829c606529508c100e65",
+  "sdk": "NCS3.4.1 / Zephyr4.4.2 / GNU14.3.0",
+  "hostTests": {
+    "passed": 2,
+    "sanitizers": [
+      "address",
+      "undefined"
+    ]
+  },
+  "builds": [
+    {
+      "board": "nu40dk_kit/nrf52840",
+      "scope": "Primary target, sensor absent",
+      "compilePassed": true,
+      "flashed": false,
+      "hexSha256": "dbb93d6234d8dffbb6b8036117a14e98b46adbb2f5f4e7759139aee1d846ae61",
+      "elfSha256": "1e317352a65e139272a9a9c1ba59b17f7ed211f1412c6713c04d2f47247bd38b",
+      "memory": {
+        "FLASH": {
+          "usedBytes": 195780,
+          "total": "1 MB"
+        },
+        "RAM": {
+          "usedBytes": 39276,
+          "total": "256 KB"
+        }
+      }
+    },
+    {
+      "board": "nu40dk_kit/nrf52840",
+      "scope": "Synthetic MPU6050 compile fixture only",
+      "compilePassed": true,
+      "flashed": false,
+      "hexSha256": "b051031c205cab1f61281b6e6661124dca183db28db8c303977914c643a92a6c",
+      "elfSha256": "645aa3f619372d342adeb159ba24a1ec6fa330c317bf23a8acae7b5c1160b967",
+      "memory": {
+        "FLASH": {
+          "usedBytes": 199872,
+          "total": "1 MB"
+        },
+        "RAM": {
+          "usedBytes": 39340,
+          "total": "256 KB"
+        }
+      }
+    },
+    {
+      "board": "nu54v_dk/nrf54l15/cpuapp",
+      "scope": "Temporary sensorless physical BLE target",
+      "compilePassed": true,
+      "flashed": true,
+      "hexSha256": "fd62b94b1201f348751376ca75b09b654abf4a597014325783ef6db52d1d8726",
+      "elfSha256": "df895c9cd9e37f6108180228595eeae374acdfc94e55a1de849513de8f541cac",
+      "memory": {
+        "FLASH": {
+          "usedBytes": 192732,
+          "total": "1524 KB"
+        },
+        "RAM": {
+          "usedBytes": 36756,
+          "total": "252 KB"
+        }
+      }
+    }
+  ],
+  "sourceHashes": {
+    "CMakeLists.txt": "6a86a7119a80268d77959249604b451c2df6fbd4b31f4fb6cc09dfbc6516cbf0",
+    "boards/nu40dk_kit_nrf52840.overlay": "18b7c71606e32eb745e4b12620952574616a197234e8c82cc0f9f3909d30eba1",
+    "boards/nu54v_dk_nrf54l15_cpuapp.conf": "3f5f03a4ae095d6ff627718c03fbbc3b90ae7fe9bf365579382718d82531ba32",
+    "boards/nu54v_dk_nrf54l15_cpuapp.overlay": "22b0f1110b36efba75c1a49f920503afda9e7689a7eb00ea7421ed95e8e34b34",
+    "prj.conf": "1e2f0ec71080c3e92b1ed3f4d3736e255aadad4eaf5ad78360b9268078c8c15b",
+    "src/ap/ble_peripheral.c": "1bcdaa9f6f5d2e777f2f33d3d3abb86d44c831062b7fc8da693656ff933551f6",
+    "src/ap/dt_button.c": "e7c411c570465021f173148403d2050ba95cf420a722c1e14d4c32053de2cf78",
+    "src/ap/dt_controller.c": "4ec4ded7359bd79fcf370f072b8a07c6255b463c75f97c31cbe9fcc7783dc198",
+    "src/ap/dt_tx_queue.c": "76235275cf7bd217c43d569c0ae17ffc6c5a01cbdb727e372ae323d3a256a95c",
+    "src/common/dt_ble.h": "02cac1fe8f809a2f229b8ab37bebfbddac6107da97dec862dc45152728b3aab3",
+    "src/common/dt_button.h": "8dfe1eeae6e8e826297db82c470efd7e4aba729dbb391f2a99d2ddb228362d30",
+    "src/common/dt_controller.h": "ec00a47c961ad17cc0bd93f3fba3e8c26e20b874f0cb50e59e7afc6311b0c0b0",
+    "src/common/dt_tx_queue.h": "2e7e3d8640b78349a40e695eca4893496fe552f380a02e90e357784d46c57a46",
+    "src/hw/driver/buttons.c": "9f68309a6d177f5ac449f973c89361e1b13edcf3eea496d54b120e46a89601bf",
+    "src/hw/driver/external_imu.c": "48a56e8d9a013ff5354185cf336688fd750ab4e51b44970dcbeec0d861099802",
+    "src/main.c": "57873488280d76587a2355d64549e9d80a4ed35d4e446c54a213d8701683bc84",
+    "tools/build-board.py": "fa1b555d2efa4bed7df9ea055c9be54d19881345e27aa4d48c69d275bdc21330",
+    "tools/install-nu54-preview.py": "a79ec20e459d7b1941ce01b70d0f5d65d21fbd5d5ebc235df0277f6e0f157bde"
+  },
+  "nu54Install": {
+    "codeCompared": true,
+    "comparisonChunkBytes": 512,
+    "codeRangeUpperBound": "0x30000",
+    "walletStorageReadOrWritten": false,
+    "walletStorageExcluded": [
+      "0x174000",
+      "0x17d000"
+    ],
+    "separateTennisSettings": [
+      "0x168000",
+      "0x170000"
+    ],
+    "separatePersistedIdentity": 1,
+    "security": "LE Secure Connections encrypted/bonded Just Works, no PIN/MITM; explicitly approved",
+    "backup": "Private code-sector backups retained outside Git; no keys/settings published"
+  },
+  "notVerified": [
+    "NU40 physical board/GPIO",
+    "External IMU accuracy",
+    "Physical Windows",
+    "Fresh unbonded-PC approval-dialog interaction"
+  ],
+  "physicalValidation": {
+    "date": "2026-10-19",
+    "hardware": "NU54 without IMU",
+    "gameCleanSource": "bf86e40147d1acee1a03e1139494759054ab0317",
+    "osBonded": true,
+    "linkReply": true,
+    "securityLevel": 2,
+    "secureConnections": true,
+    "sensorReady": false,
+    "calibrated": false,
+    "bondReusedAfterBoardReset": true,
+    "resetErasedOrReadStorage": false,
+    "evidence": "https://github.com/digital-tennis/digital-tennis-game/blob/7af42a20b42975b21a41ab3f7055c6846fb510e9/docs/evidence/ble-bonding-2026-10-19/validation.json"
+  }
+}

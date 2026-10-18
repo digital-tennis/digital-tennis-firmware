@@ -1,0 +1,23 @@
+/ {
+    chosen { zephyr,settings-partition = &tennis_bonds; };
+    aliases {
+        racket-confirm = &button0;
+        racket-start = &button1;
+        racket-pause = &button2;
+        racket-skill = &button3;
+    };
+};
+
+/* Separate from the reference wallet storage at 0x174000..0x17cfff.
+ * Installation must first verify this reserved code-slot tail is unused/blank.
+ * Never erase or mount the reference wallet storage as a Tennis settings volume.
+ */
+&cpuapp_rram {
+    partitions {
+        tennis_bonds: partition@168000 {
+            compatible = "zephyr,mapped-partition";
+            label = "digital-tennis-bonds";
+            reg = <0x168000 0x8000>;
+        };
+    };
+};
