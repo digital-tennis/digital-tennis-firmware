@@ -1,6 +1,6 @@
 {
   "date": "2026-10-19",
-  "scope": "Software build and installed code verification; physical bonding still pending OS approval",
+  "scope": "Software build, installed code and actual NU54 encrypted bond/link/reset reuse in normal Unity game",
   "primaryHardware": "NU40-DK + separately attached external IMU",
   "protocolCommit": "12dae689fd9b25187426829c606529508c100e65",
   "sdk": "NCS3.4.1 / Zephyr4.4.2 / GNU14.3.0",
@@ -107,9 +107,21 @@
   "notVerified": [
     "NU40 physical board/GPIO",
     "External IMU accuracy",
-    "OS bonding completed",
-    "Actual Tennis LINK_REPLY",
-    "Restart bond reuse",
-    "Physical Windows"
-  ]
+    "Physical Windows",
+    "Fresh unbonded-PC approval-dialog interaction"
+  ],
+  "physicalValidation": {
+    "date": "2026-10-19",
+    "hardware": "NU54 without IMU",
+    "gameCleanSource": "bf86e40147d1acee1a03e1139494759054ab0317",
+    "osBonded": true,
+    "linkReply": true,
+    "securityLevel": 2,
+    "secureConnections": true,
+    "sensorReady": false,
+    "calibrated": false,
+    "bondReusedAfterBoardReset": true,
+    "resetErasedOrReadStorage": false,
+    "evidence": "https://github.com/digital-tennis/digital-tennis-game/blob/7af42a20b42975b21a41ab3f7055c6846fb510e9/docs/evidence/ble-bonding-2026-10-19/validation.json"
+  }
 }

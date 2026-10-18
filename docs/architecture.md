@@ -74,3 +74,9 @@ NU54 overlay는 현재 직접 실행 시험용이다. 원래 slot1의 사용하�
 ### NU54 승인된 코드 교체
 
 `tools/install-nu54-preview.py`는 기본적으로 계획만 출력한다. 실제 쓰기는 별도 승인 후 --execute, 검토한 HEX SHA256, 새로운 비공개 --backup 디렉터리를 모두 지정해야 한다.0..0x30000의 코드만 허용하고 UICR/전체 erase/자동 unlock을 금지한다. 최초 설치는 Tennis 저장이 비어 있어야 한다. 이미 설치한 Tennis를 수정할 때는 --previous-image와 성공한 --previous-receipt를 함께 주고 기존 코드 바이트가 일치해야 한다. 코드 섹터만 백업/교체하고512바이트 블록으로 최종 대조한다. 지갑·bond 데이터는 공개하지 않는다. 백업·HEX는 Git에 넣지 않는다. 실물 리비전/다른 앱에 이 도구를 일반 플래셔처럼 사용하지 않는다.
+
+## 2026-10-19 센서 없는 실물 연결 결과
+
+Mac 일반 Unity 창의 clean 빌드에서 NU-54 실제 본딩·암호화·LINK_PROBE/REPLY와 보드 reset 후 본딩 재사용을 통과했다. 보안 진단은 L2/bonded/SC를 확인했고 센서 ready/calibrated는 false를 유지했다. 센서 없는 보정 요청은 실패하고 게임의 동작 테스트·저장은 차단됐다. reset은 저장영역 읽기·삭제·flash 없이 수행했다. [현재 기계 판독 결과](bonding-build-validation.json)를 확인한다.
+
+이 결과는 NU-54의 센서 없는 BLE 경계이며 NU40 실물 GPIO/BLE·외장 IMU 정확도·물리 Windows 검증을 대신하지 않는다. 최초 OS PIN/숫자 대조 팝업 조작을 확인한 것은 아니다. 이전 ATT15/SMP timeout은 당시 실패 기록으로 유지한다.
