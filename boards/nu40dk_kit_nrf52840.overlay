@@ -1,0 +1,15 @@
+/* Application adaptation of nu40dk-kit df4367ed: upstream button.c uses _DEF_LOW.
+ * Preserve the vendored DTS and express the logical active-low level here.
+ */
+/ {
+    aliases {
+        racket-confirm = &btn0;
+        racket-start = &btn1;
+        racket-pause = &btn2;
+        racket-skill = &btn3;
+    };
+};
+&btn0 { gpios = <&gpio0 31 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
+&btn1 { gpios = <&gpio1 7 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
+&btn2 { gpios = <&gpio1 6 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
+&btn3 { gpios = <&gpio1 5 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>; };
