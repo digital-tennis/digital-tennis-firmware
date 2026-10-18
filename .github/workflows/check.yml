@@ -5,6 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install intelhex==2.3.0
+      - run: python tests/installer_checks.py
       - run: cmake -S . -B .work/build -DCMAKE_C_FLAGS='-fsanitize=address,undefined'
       - run: cmake --build .work/build
       - run: ctest --test-dir .work/build --output-on-failure

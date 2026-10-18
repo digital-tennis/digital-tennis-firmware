@@ -22,14 +22,16 @@ if a.backup is None or a.backup.exists():raise SystemExit('Supply a NEW private 
 os.umask(0o077);a.backup.mkdir(parents=True)
 from pyocd.core.helpers import ConnectHelper
 from pyocd.flash.file_programmer import FileProgrammer
-session=ConnectHelper.session_with_chosen_probe(target_override='nrf54l',connect_mode='attach',options={'frequency':1000000,'auto_unlock':False,'halt_on_connect':False,'resume_on_disconnect':False})
+session=ConnectHelper.session_with_chosen_probe(target_override='nrf54l',connect_mode='attach',options={'frequency':500000,'cmsis_dap.limit_packets':True,'auto_unlock':False,'halt_on_connect':False,'resume_on_disconnect':False})
 if session is None:raise SystemExit('No probe selected')
 def read_range(target,start,size):
  # Small transfers avoid USB probe bulk-read timeouts during final verification.
- return b''.join(bytes(target.read_memory_block8(at,min(512,start+size-at))) for at in range(start,start+size,512))
+ return b''.join(bytes(target.read_memory_block8(at,min(128,start+size-at))) for at in range(start,start+size,128))
 with session:
  t=session.target;region=t.get_memory_map().get_region_for_address(0)
  if region.blocksize!=4096:raise SystemExit('Unexpected flash sector geometry')
+ # Halt before bounded code reads; a running sleeping/radio core can stall debug transfers.
+ t.halt()
  # Updates verify previous Tennis code and never read bond keys or wallet storage.
  if a.previous_image or a.previous_receipt:
   if not (a.previous_image and a.previous_receipt):raise SystemExit('Supply both prior Tennis image and receipt')
@@ -46,7 +48,15 @@ with session:
  t.halt();end=(max(e for s,e in segments)+4095)//4096*4096
  original=read_range(t,0,end);backup=a.backup/'previous-code.hex';restore=IntelHex();restore.frombytes(original,offset=0);restore.write_hex_file(str(backup))
  (a.backup/'installation-plan.json').write_text(json.dumps(plan|{'backupSha256':hashlib.sha256(backup.read_bytes()).hexdigest(),'backupEnd':hex(end)},indent=2)+'\n')
- FileProgrammer(session,chip_erase='sector',smart_flash=True,trust_crc=False,keep_unwritten=True).program(str(image),file_format='hex')
+ # Fill every code-sector byte from the bounded backup before overlaying reviewed code.
+ # Avoid pyOCD smart-flash bulk page reads that time out with this USB probe.
+ update=IntelHex();update.frombytes(original,offset=0)
+ for address in h.addresses():update[address]=h[address]
+ complete=a.backup/'complete-code-update.hex';update.write_hex_file(str(complete))
+ FileProgrammer(session,chip_erase='sector',smart_flash=False,trust_crc=False,keep_unwritten=False).program(str(complete),file_format='hex')
+ t.halt()
+ # Verify only addresses explicitly present in the reviewed public image.
+ # Padding is preserved in the sector update but never treated as public evidence.
  for start,stop in segments:
   if read_range(t,start,stop-start)!=bytes(h.tobinarray(start=start,end=stop-1)):raise RuntimeError('Program verification mismatch; backup retained, do not proceed')
  plan['writtenAndVerified']=True
