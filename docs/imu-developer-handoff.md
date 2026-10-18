@@ -43,7 +43,7 @@ DT 번호와 절 구성은 프로젝트의 문서 관리 방식이다. ATA iSpec
 | 수신·보정·중복·단위 변환 | ble-unity `Runtime/BleControllerClient.cs` / `Calibrate`, `Tick`, `TryRead` | 같은 연결의 보정 완료 ACK 필요. STATUS flags만으로 보정 성공 처리 금지 |
 | 의도→게임 액션 | game `Assets/Scripts/Runtime/NativeControllerBackend.cs` / `TryRead` | SwingKind→PlayerAction 변환. 기기에 Near/Far 역할을 넣지 않기 |
 | 선택한 기기·설정 테스트 | game `ControllerSetupSession.cs`, `ControllerDevices.cs`의 `InputDeviceManager`, `PlayerInputAdapter.cs` | 무선 연결·보정·서브/스윙/스킬 테스트 완료 후 저장. 저장 전 경기 입력 금지 |
-| 거리·타이밍·물리 효과 | game `TennisMatchController.cs` / `ApplyPlayerInput`, `SubmitInput`, `RacketInput.cs`, `RacketInput.cs` 안의 `RacketShot` | 일반 타격 게이트를 유지. 실제 인식 성공과 경기 타격 성공은 다른 지표 |
+| 거리·타이밍·물리 효과 | game `TennisMatchController.cs` / `ApplyPlayerInput`, `SubmitInput`, `RacketInput.cs`의 `RacketInputGate`·`RacketShot` | 일반 타격 게이트를 유지. 실제 인식 성공과 경기 타격 성공은 다른 지표 |
 
 새 센서 모델을 붙이는 일만으로 protocol·SDK·game을 모두 수정할 필요는 없다. 기존 단위와 SWING 계약을 만족하면 펌웨어 변경으로 끝난다. 반대로 새로운 액션 ID나 전송 필드가 필요하면 protocol부터 의존성 순서대로 수정한다.
 
@@ -133,18 +133,22 @@ DT 번호와 절 구성은 프로젝트의 문서 관리 방식이다. ATA iSpec
 각 저장소 root에서 실행한다. 경로는 실제 clone 위치로 바꾼다.
 
 ```sh
-# firmware: 기본은 CMake에 고정한 protocol을 취득한다.
+# firmware: clone 위치를 실제 경로로 바꾼다.
+cd /absolute/path/digital-tennis-firmware
 cmake -S . -B .work/imu-host -DDT_PROTOCOL_ROOT=/absolute/path/digital-tennis-protocol
 cmake --build .work/imu-host
 ctest --test-dir .work/imu-host --output-on-failure
 
 # protocol: C/C# 공유 벡터·오류 검증
+cd /absolute/path/digital-tennis-protocol
 python3 tools/check.py
 
 # BLE SDK: 실물 없는 패킷/연결/보정 검사
+cd /absolute/path/digital-tennis-ble-unity
 dotnet run --project tests/Checks.csproj -c Release -p:ProtocolRoot=/absolute/path/digital-tennis-protocol
 
 # game: 실제 프로젝트 위치에서, Editor를 닫고 실행
+cd /absolute/path/digital-tennis-game
 bash tools/unity.sh check
 bash tools/unity.sh test-controller
 ```
