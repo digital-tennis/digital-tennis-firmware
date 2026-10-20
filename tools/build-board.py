@@ -8,6 +8,7 @@ p.add_argument('--toolchain',type=Path,required=True,help='Existing Nordic toolc
 p.add_argument('--board',choices=['nu40dk_kit/nrf52840','nu54v_dk/nrf54l15/cpuapp'],default='nu40dk_kit/nrf52840')
 p.add_argument('--protocol',type=Path,help='Optional checked local protocol source; otherwise pinned FetchContent')
 p.add_argument('--overlay',type=Path,help='Only a reviewed external-IMU hardware overlay')
+p.add_argument('--trace',action='store_true',help='Developer-only bounded UART IMU trace; not BLE raw streaming')
 p.add_argument('--pristine',action='store_true',help='Recreate only the selected generated build directory')
 p.add_argument('--out',type=Path,default=Path('.work/zephyr-build'))
 a=p.parse_args();root=Path(__file__).resolve().parents[1];sdk=a.sdk_root.resolve();tool=a.toolchain.resolve();out=a.out.resolve();env=os.environ.copy()
@@ -19,6 +20,7 @@ for var in json.loads((tool/'environment.json').read_text())['env_vars']:
  env[var['key']]=value
 env['ZEPHYR_BASE']=str(sdk/'zephyr')
 args=[str(tool/'bin/python3'),'-m','west','build',*(['-p','always'] if a.pristine else []),'--no-sysbuild','-b',a.board,str(root),'-d',str(out),'--','-DDT_ZEPHYR_APP=ON','-DUSER_CACHE_DIR='+str(out.parent/'zephyr-cache')]
+args+=['-DDT_IMU_TRACE='+('ON' if a.trace else 'OFF')]
 if a.protocol:args+=['-DDT_PROTOCOL_ROOT='+str(a.protocol.resolve())]
 if a.overlay:args+=['-DEXTRA_DTC_OVERLAY_FILE='+str(a.overlay.resolve())]
 raise SystemExit(subprocess.run(args,cwd=sdk,env=env).returncode)
