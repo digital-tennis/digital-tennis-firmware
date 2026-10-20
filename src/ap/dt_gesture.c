@@ -1,6 +1,7 @@
 #include "dt_gesture.h"
 #include <math.h>
 #include <string.h>
+#define DT_GESTURE_INCLUDE_RULES
 #include "dt_gesture_rules.h"
 static float norm(const float v[3]){return sqrtf(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);}
 static bool mapped_gyro(const dt_imu_sample *s,const float axis[9],const float bias[3],bool left,float out[3]){
@@ -44,9 +45,11 @@ dt_gesture_result dt_gesture_classify_ring(const dt_imu_sample *s,unsigned count
   memcpy(previous,gyro,sizeof(previous));
  }
  if(path<=0)return result;
- result.features.direction_x=integral[0]/path;result.features.direction_z=integral[2]/path;
+ // Ratios are mathematically bounded; roundoff must not turn a unit axis into
+ // an out-of-range feature that disagrees with exported CSV diagnostics.
+ result.features.direction_x=fminf(1,fmaxf(-1,integral[0]/path));result.features.direction_z=fminf(1,fmaxf(-1,integral[2]/path));
  result.features.sweep_deg=path;result.features.active_ms=(float)(uint32_t)(at(s,count,head,capacity,end-1)->time_ms-at(s,count,head,capacity,begin)->time_ms);
- result.features.coherence=norm(integral)/path;
+ result.features.coherence=fminf(1,norm(integral)/path);
  const dt_gesture_features *f=&result.features;
  for(unsigned i=0;i<7;i++){
   const dt_gesture_rule *r=&gesture_rules[i];float az=fabsf(f->direction_z);

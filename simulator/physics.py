@@ -70,6 +70,9 @@ def generate(name,seed=1,speed=1,amplitude=1,noise=1,mount_deg=0,left=False,leve
     if name not in presets() and name not in NEGATIVES:raise ValueError('Unknown motion')
     if not .6<=speed<=1.5 or not .7<=amplitude<=1.3 or not 0<=noise<=3 or not 0<=mount_deg<=360 or not .1<=lever_m<=.4:raise ValueError('Parameter out of range')
     profile=presets().get(name);pose,start,end,total=make_pose(profile,speed,amplitude,left) if profile else negative_pose(name)
+    return sample_trajectory(pose,start,end,total,name,int(profile['kind']) if profile else 0,seed,speed,amplitude,noise,mount_deg,left,lever_m)
+def sample_trajectory(pose,start,end,total,name,expected,seed=1,speed=1,amplitude=1,noise=1,mount_deg=0,left=False,lever_m=.25):
+    """Sensor equations shared with independent experimental motion families."""
     rng=random.Random(seed);mount=rz(math.radians(mount_deg));bias=[rng.uniform(-1,1) for _ in range(3)]
     frames=[];clipped=0
     for i in range(int(total*100)+1):
@@ -81,7 +84,7 @@ def generate(name,seed=1,speed=1,amplitude=1,noise=1,mount_deg=0,left=False,leve
             if abs(value)>limit:clipped+=1
             value=max(-limit,min(limit,value));value=round(value/(limit/32768))*(limit/32768);values.append(value)
         frames.append({'time_ms':i*10,'sensor':values,'position':position,'rotation':r})
-    return {'frames':frames,'axis':[x for row in mount for x in row],'start_ms':round(start*1000),'end_ms':round(end*1000),'expected':int(profile['kind']) if profile else 0,'clippedAxes':clipped,'parameters':{'motion':name,'seed':seed,'speed':speed,'amplitude':amplitude,'noise':noise,'mount_deg':mount_deg,'left':left,'lever_m':lever_m}}
+    return {'frames':frames,'axis':[x for row in mount for x in row],'start_ms':round(start*1000),'end_ms':round(end*1000),'expected':expected,'clippedAxes':clipped,'parameters':{'motion':name,'seed':seed,'speed':speed,'amplitude':amplitude,'noise':noise,'mount_deg':mount_deg,'left':left,'lever_m':lever_m}}
 def write_csv(data,path):
     with Path(path).open('w',newline='') as f:
         w=csv.writer(f);w.writerow(['time_ms','ax_mps2','ay_mps2','az_mps2','gx_dps','gy_dps','gz_dps'])

@@ -33,3 +33,7 @@ python3 simulator/evaluate.py --repetitions 100 --validation-seed 731091 --out .
 궤적은 [motions.csv](motions.csv), 판정 범위는 [gesture-rules.csv](../config/gesture-rules.csv)입니다. 범위를 수정하면 **CMake 재빌드**가 필요합니다. CSV가 펌웨어에 런타임 로드되거나 BLE로 전송되는 기능은 없습니다.
 
 기본 보드 앱은 기존 빠른 가속도 피크 프로필을 유지합니다. 실험용 7종 프로필은 스윙 종료를 기다려 추가 지연이 있고, 경기 상황을 보드에 보내는 BLE 명령도 아직 없습니다. [설계·수정 위치·실물 인수 가이드](../docs/tennis-gesture-simulator.md)와 [검증 기록](../docs/gesture-simulator-validation.json)을 함께 읽어 주세요.
+
+## 실험으로 임계값 찾기
+
+[선택 기준·고정 시드·최종 전후 비교](../docs/threshold-experiment.md)에 따라 `threshold_study.py tune`으로60개 후보를 비교하고, 선택한 CSV를 적용·재빌드한 다음 `evaluate`로 분리한 최종 표본을 엽니다. 실험을 반복할 때는 새로운 출력 폴더를 사용합니다. `config/gesture-detector.csv`와 `config/gesture-rules.csv`를 CMake가 읽으며 기존 빠른 보드 프로필은 유지합니다.

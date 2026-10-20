@@ -1,0 +1,2 @@
+filter_alpha,trigger_dps,release_dps,cooldown_ms,min_swing_ms,max_swing_ms
+0.4,180,80,200,20,1000

@@ -1,6 +1,7 @@
 #include "dt_controller.h"
 #include <math.h>
 #include <string.h>
+#include "dt_gesture_rules.h"
 static float magnitude(const float *v){return sqrtf(v[0]*v[0]+v[1]*v[1]+v[2]*v[2]);}
 static float clamp(float x,float low,float high){return fminf(high,fmaxf(low,x));}
 static bool finite_sample(const dt_imu_sample *s){for(int i=0;i<3;i++){if(!isfinite(s->acceleration[i])||!isfinite(s->gyro_dps[i])||fabsf(s->acceleration[i])>200||fabsf(s->gyro_dps[i])>8000)return false;}return true;}
@@ -9,7 +10,12 @@ static void remember(dt_controller *c,uint8_t result){unsigned i=c->history_next
 static void ack(dt_controller *c,dt_packet *p,uint8_t result,uint32_t now){packet(c,p,129,result,now);p->event_id=c->command_id;}
 dt_motion_config dt_motion_defaults(void){dt_motion_config c={.axis={1,0,0,0,1,0,0,0,1},.filter_alpha=.25f,.trigger_dps=220,.release_dps=80,.serve_dps=180,.cooldown_ms=200,.calibration_samples=64,.max_gap_ms=100,.min_swing_ms=20,.max_swing_ms=1000,.max_power_dps=2000,.trigger_g=2.5f,.release_g=1.5f,.max_power_g=12};return c;}
 dt_motion_config dt_motion_peak_defaults(void){dt_motion_config c=dt_motion_defaults();c.acceleration_peak=true;return c;}
-dt_motion_config dt_motion_gesture_defaults(void){dt_motion_config c=dt_motion_defaults();c.recognize_gestures=true;return c;}
+dt_motion_config dt_motion_gesture_defaults(void){
+ dt_motion_config c=dt_motion_defaults();c.recognize_gestures=true;
+ c.filter_alpha=DT_GESTURE_FILTER_ALPHA;c.trigger_dps=DT_GESTURE_TRIGGER_DPS;c.release_dps=DT_GESTURE_RELEASE_DPS;
+ c.cooldown_ms=DT_GESTURE_COOLDOWN_MS;c.min_swing_ms=DT_GESTURE_MIN_SWING_MS;c.max_swing_ms=DT_GESTURE_MAX_SWING_MS;
+ return c;
+}
 bool dt_controller_set_context(dt_controller *c,dt_gesture_context context){
  if(!c||(unsigned)context>DT_CONTEXT_RALLY)return false;
  c->gesture_context=context;c->swinging=false;c->latched=true;return true;
@@ -29,7 +35,7 @@ static void retain(dt_controller *c,const dt_imu_sample *s){
 bool dt_controller_init(dt_controller *c,dt_imu_port port,dt_motion_config config){
  if(!c||!port.read||!isfinite(config.filter_alpha)||config.filter_alpha<=0||config.filter_alpha>1||!isfinite(config.trigger_dps)||config.trigger_dps<=0||!isfinite(config.release_dps)||config.release_dps<0||config.release_dps>=config.trigger_dps||!isfinite(config.serve_dps)||config.serve_dps<=0||config.calibration_samples<8||config.calibration_samples>4096||config.cooldown_ms<20||config.cooldown_ms>5000||config.max_gap_ms<10||config.max_gap_ms>1000||config.min_swing_ms<10||config.max_swing_ms<=config.min_swing_ms||config.max_swing_ms>5000||!isfinite(config.max_power_dps)||config.max_power_dps<=config.trigger_dps)return false;
  if(!isfinite(config.trigger_g)||!isfinite(config.release_g)||!isfinite(config.max_power_g)||config.release_g<=1||config.trigger_g<=config.release_g||config.max_power_g<=config.trigger_g||config.max_power_g>20)return false;
- if(config.recognize_gestures&&config.acceleration_peak)return false;
+ if(config.recognize_gestures&&(config.acceleration_peak||config.release_dps<=0))return false;
  for(int row=0;row<3;row++){for(int col=0;col<3;col++){float dot=0;for(int k=0;k<3;k++){float v=config.axis[row*3+k];if(!isfinite(v))return false;dot+=v*config.axis[col*3+k];}if(fabsf(dot-(row==col?1:0))>.001f)return false;}}
  const float *a=config.axis;float determinant=a[0]*(a[4]*a[8]-a[5]*a[7])-a[1]*(a[3]*a[8]-a[5]*a[6])+a[2]*(a[3]*a[7]-a[4]*a[6]);
  if(fabsf(determinant-1)>.001f)return false;

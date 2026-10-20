@@ -6,7 +6,9 @@
 static bool absent(void *c,dt_imu_sample *s){(void)c;(void)s;return false;}
 int main(void){
  const float axis[9]={1,0,0,0,1,0,0,0,1},bias[3]={0};dt_imu_sample samples[40]={0};
- for(unsigned i=0;i<40;i++){samples[i].time_ms=i*10;samples[i].acceleration[2]=3*9.80665f;samples[i].gyro_dps[2]=i<30?400:0;}
+ // Strong canonical windows isolate direction/context checks from the learned
+ // lower acceleration cutoff, which is evaluated by separate sensor replays.
+ for(unsigned i=0;i<40;i++){samples[i].time_ms=i*10;samples[i].acceleration[2]=4*9.80665f;samples[i].gyro_dps[2]=i<30?400:0;}
  dt_gesture_result r=dt_gesture_classify(samples,40,axis,bias,false,80,DT_CONTEXT_UNKNOWN);assert(r.kind==1&&r.reason==DT_GESTURE_OK);
  dt_imu_sample ring[128]={0};unsigned head=7;
  for(unsigned i=0;i<40;i++)ring[(head+128-40+i)%128]=samples[i];
