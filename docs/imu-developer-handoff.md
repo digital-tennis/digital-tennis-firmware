@@ -4,7 +4,7 @@
 
 | 항목 | 내용 |
 | --- | --- |
-| 개정 / 기준일 | R02 / 2026-10-20 |
+| 개정 / 기준일 | R03 / 2026-10-20 |
 | 독자 | NU40-DK와 외장 IMU를 실제로 보유한 후속 개발자 |
 | 제품 | **NU40-DK + 별도로 연결·고정하는 외장 6축 IMU** |
 | 현재 시험 보드 | NU-54는 센서 없는 버튼/BLE 시험용. 이번 작업에서 추가 버튼 시험·flash 없음 |
@@ -34,7 +34,7 @@ DT 번호와 절 구성은 프로젝트의 문서 관리 방식이다. ATA iSpec
 | --- | --- | --- |
 | 센서 모델·버스·주소·핀 | firmware `overlays/<검토한-센서>.overlay`, 보드 DTS, `prj.conf` | 실물 데이터시트와 핀맵으로 결정. NU54 저장/GPIO 설정을 NU40에 복사하지 않기 |
 | 드라이버·ODR·full-scale·read 실패 | firmware `src/hw/driver/external_imu.c` / `dt_external_imu_read` | 완성된 가속도m/s²·자이로deg/s·단조 시각ms를 반환 |
-| 샘플/설정 자료형 | firmware `src/common/dt_controller.h` / `dt_imu_sample`, `dt_motion_config`, `dt_motion_rule` | raw 배열 순서와 단위 고정. BLE 바이트 배치와는 별개 |
+| 샘플/설정 자료형 | firmware `src/common/dt_imu.h` / `dt_imu_sample`, `dt_controller.h` / 설정·규칙 | raw 배열 순서와 단위 고정. BLE 바이트 배치와는 별개 |
 | 장착 방향·필터·임계값 | firmware `src/ap/dt_controller.c` / `dt_motion_defaults`, `dt_controller_init`, `dt_controller_tick` | `main.c`에서 실측 설정을 주입. 초기 기본값을 검증된 상품 값으로 간주하지 않기 |
 | FH/BH/서브 분류 | firmware 같은 파일의 `classify` | 기본은 peak_y와 peak_z 기반 휴리스틱. 녹화 데이터로 확인·교체 |
 | 특수 제스처·프로필 | firmware `dt_controller_set_rules`, `dt_controller_set_mode`, `dt_controller_intent` | 최대8규칙, 모호한 겹침/미일치 거부. 명시적 모드 선택과 자동 인식 구분 |
@@ -84,8 +84,8 @@ DT 번호와 절 구성은 프로젝트의 문서 관리 방식이다. ATA iSpec
 
 | 설정 | 현재 시작값 | 바꿀 때 확인 |
 | --- | --- | --- |
-| axis | 3×3 identity | 센서→라켓 회전 행렬. 각 행의 정규직교를 init이 검사. 실제 양의 회전으로 부호 검증 |
-| left_handed | false | 현재 매핑된 gyro Z를 반전. 장착 행렬과 이중 반전 금지 |
+| axis | 3×3 identity | 센서→라켓 회전 행렬. 정규직교와 determinant +1을 init이 검사. 실제 양의 회전으로 부호 검증 |
+| left_handed | false | 기존 조준 경로는 매핑된 gyro Z 반전. 실험 특징 경로는 축벡터 Y/Z 반전. 장착 행렬과 이중 반전 금지 |
 | filter_alpha | 0.25 | 지연과 노이즈 절충. 0초과1이하 |
 | trigger/release | 220/80deg/s | 시작/해제 히스테리시스. release<trigger |
 | serve_dps | 180deg/s | 기본 분류의 최고 gyro Y 기준. 정확한 서브 판정이 보장되지 않음 |
@@ -102,6 +102,8 @@ DT 번호와 절 구성은 프로젝트의 문서 관리 방식이다. ATA iSpec
 보정은 PC의 CALIBRATE 명령→연속 정지 샘플→ACK 성공/실제 flags의 흐름이다. 전역 heading/3D 위치 추적을 하지 않는다. yaw/pitch는 스윙 구간의 상대 회전량이며 장시간 적분한 위치가 아니다. 가속도는 샘플 유효성·정지 검사와 앱의 피크/세기 판정에 쓰이고, 동작 종류 분류는 주로 자이로를 사용한다. 피크 모드는 회전 시작부터 피크까지의 상대각을 보내며 평행이동만으로는 타격을 만들지 않는다.
 
 ## 50 세 번째 과제: 실제 모션을 액션으로 판정하기
+
+별도 [가상 IMU·7종 실험 프로필](tennis-gesture-simulator.md)이 추가됐습니다. 3D 궤적→센서값→같은 C 코드로 분류하고 애매한 상황을 거부합니다. 현재 기본 앱은 기존 피크 프로필이며, 실험용 profile의 경기 상태 C setter에 대응하는 BLE 명령은 아직 없습니다. 실물 검증과 지연 측정 전 자동 적용하지 않습니다.
 
 **입력:** 같은 장착 방식으로 녹화한 정지, 이동, FH, BH, 서브, 의도하지 않은 움직임. 가능하면 서로 다른 개발자·속도·좌/우손을 포함한다. 데이터를 학습/조정용과 평가용으로 분리한다.
 

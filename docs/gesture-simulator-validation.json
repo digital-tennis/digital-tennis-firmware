@@ -1,0 +1,684 @@
+{
+  "document": "DT-HW-31-22-00",
+  "revision": "R01",
+  "date": "2026-10-20",
+  "scope": "Kinematic synthetic consistency only; not human gesture accuracy",
+  "baselineFirmwareMain": "46881a8e0610b9439d77785f06186e1f77e3535b",
+  "protocolCommit": "a5ca8b516e33b277c22f9c3ae0cb5cd60ce65498",
+  "sdkCommit": "0b1847680e9bedcfa4f2bcce1f77d7bc4df83efa",
+  "sourceSha256": {
+    "src/ap/dt_controller.c": "711783f004c9a746d7d2bd1180ac860e444af6399393d83078779488c076ac15",
+    "src/ap/dt_gesture.c": "0bbe72f69b6a7a7189ab1711be1a24eb8267d25ab36075921efe914db0caf8f6",
+    "src/common/dt_controller.h": "0f5577fbd21b10a1a0392bca703d560306d98d81befd6b62a7fe81bcc9e8754c",
+    "src/common/dt_gesture.h": "94d35c53e01af670ab0db56d1bee1c2ee1f39765d205cd674b9a0f4b085a041f",
+    "src/common/dt_imu.h": "cfc15938550a434563024ed52678274af22a99e306eacac29585bc10bef787e2",
+    "config/gesture-rules.csv": "048453219e68c344e31000b0d34753dceb547a00fb3f6c8d92c142a585fae123",
+    "tools/generate-gesture-rules.py": "7cd4588da08917ab71806c53dfa261779d996d5a7a50c9fca0c45ea1ec05c520",
+    "tools/imu_replay.c": "f855de30bbd0aac706e061a78c8cf9774e9e1bff269efd471da070ee75daff3c",
+    "simulator/physics.py": "76d4fbcc19fbdeee7709766bb1929e60e0081f0a594b294e06d62c98aa9cdb18",
+    "simulator/motions.csv": "aa4058023022af8cdf728fdb9b9e83dd8a675fdbbf184f62fcb7ccd331a63529",
+    "simulator/run.py": "8b12c16f6cfb9c55edcc8d2d56819c79e7c74b511e0782aa64a311b2a69a70bc",
+    "simulator/evaluate.py": "0f87071af83e76fef4dc2e516f4640ff11cd320b64549a553471ece05bd80ffa",
+    "simulator/server.py": "82e5800b402568c2a650d8595fd786cb535aea5d62ec6523c9248c68078de3ee",
+    "simulator/index.html": "6e97b20668322f585803952bdf717306ad63f095eccc02d979bafafc1ce95b6a",
+    "tests/gesture_checks.c": "c2bee3a83aa02093647fc282d477c525cfe8a33ef7e5f8c59a29d2e5a72732b5",
+    "tests/simulator_checks.py": "db6aeefb1e4f0b676d2bd6459178f5e5cbfd4fe5c779f7c73fe4c8c7735577cd"
+  },
+  "reproduce": [
+    "cmake -S . -B .work/motion-simulator",
+    "cmake --build .work/motion-simulator",
+    "ctest --test-dir .work/motion-simulator --output-on-failure",
+    "python3 simulator/evaluate.py --repetitions 100 --validation-seed 731091 --out .work/motion-validation.json"
+  ],
+  "host": {
+    "ctestSuites": 6,
+    "passed": 6,
+    "physicsAndIntegrationCases": 9,
+    "addressUndefinedSanitizerSuitesPassed": 6
+  },
+  "packetContract": {
+    "events": 7,
+    "pipeline": "actual C-generated wire bytes -> unchanged C# PacketCodec -> calibrated BleControllerClient -> normalized intents",
+    "transport": "in-memory fixture, not physical BLE or Unity play",
+    "passed": true
+  },
+  "browser": {
+    "binding": "127.0.0.1 only",
+    "observed": [
+      "forehand",
+      "backhand",
+      "volley",
+      "lob",
+      "serve with serve context",
+      "identical serve trace with rally context gives smash",
+      "unknown overhead rejects",
+      "left slice with 90 degree mount",
+      "walking produces no events",
+      "play/pause/timeline",
+      "7-column CSV download"
+    ],
+    "screenshot": "tennis-motion-simulator.jpg",
+    "downloadRows": 518,
+    "downloadSha256": "f088243f56d4db78724c7c94b986ddc117b27f5484edb585ae57ab32e95d5900"
+  },
+  "boardBuilds": [
+    {
+      "label": "nu40-mpu6050",
+      "compileOnly": true,
+      "ordinaryBoardProfile": true,
+      "elfSha256": "35aaafe70093e4e8b588fc4768a244610d20c288e1cbfa1c0958963962124edf",
+      "memoryBytes": {
+        "FLASH": 203104,
+        "RAM": 42988
+      },
+      "drivers": {
+        "CONFIG_MPU6050": true,
+        "CONFIG_LSM6DSO": false,
+        "CONFIG_SENSOR": true
+      },
+      "trace": false
+    },
+    {
+      "label": "nu40-lsm6dso",
+      "compileOnly": true,
+      "ordinaryBoardProfile": true,
+      "elfSha256": "2d2c56ce56fc05d84e5e34eae1c5a6e7ef61a88e5f269a45fc579f5ac653c886",
+      "memoryBytes": {
+        "FLASH": 205756,
+        "RAM": 45676
+      },
+      "drivers": {
+        "CONFIG_MPU6050": false,
+        "CONFIG_LSM6DSO": true,
+        "CONFIG_SENSOR": true
+      },
+      "trace": true
+    },
+    {
+      "label": "nu40-sensorless",
+      "compileOnly": true,
+      "ordinaryBoardProfile": true,
+      "elfSha256": "03b64730664420a42da77c4072360cfc31f9a172eca5cc2d04b6b80623b4476d",
+      "memoryBytes": {
+        "FLASH": 199020,
+        "RAM": 42988
+      },
+      "drivers": {
+        "CONFIG_MPU6050": false,
+        "CONFIG_LSM6DSO": false,
+        "CONFIG_SENSOR": true
+      },
+      "trace": false
+    },
+    {
+      "label": "nu54-buttons",
+      "compileOnly": true,
+      "ordinaryBoardProfile": true,
+      "elfSha256": "439915a47b59000d7423738d26d3a8de2aab511b6c6457479790d2d238094edc",
+      "memoryBytes": {
+        "FLASH": 195844,
+        "RAM": 40428
+      },
+      "drivers": {
+        "CONFIG_MPU6050": false,
+        "CONFIG_LSM6DSO": false,
+        "CONFIG_SENSOR": true
+      },
+      "trace": false
+    }
+  ],
+  "nominal": {
+    "forehand": [
+      1
+    ],
+    "backhand": [
+      2
+    ],
+    "serve": [
+      3
+    ],
+    "smash": [
+      4
+    ],
+    "volley": [
+      5
+    ],
+    "slice": [
+      6
+    ],
+    "lob": [
+      7
+    ]
+  },
+  "ambiguity": {
+    "sameSixAxisValues": true,
+    "sensorTraceSha256": "63b7ae5bd1b0cb2d8063c80fea4d1b0e24b099a5986f3dddf9a5a1e6fc503819",
+    "unknownContext": "rejects ambiguous serve/smash",
+    "serveContext": 3,
+    "rallyContext": 4,
+    "identicalIntentCounterexample": {
+      "metadataExpected": 0,
+      "observedKind": 1,
+      "meaning": "Changing an intention label cannot change identical inertial inputs; this hard negative is not one of the 500 benign negative cases."
+    },
+    "note": "Context disambiguation, not distinct IMU patterns or a new learned skill."
+  },
+  "limitations": [
+    "Assumed fixed grip/body frame and stylized paths; no anatomy/soft tissue/ball impulse model",
+    "Full-window recognition waits for rotation release: reports latency; ordinary board app remains the earlier peak profile",
+    "A deliberate stroke and an identical accidental motion cannot be distinguished by these six channels",
+    "Match context is supplied explicitly; no current BLE command sends it to the board",
+    "No physical IMU, flash or additional NU54 button testing"
+  ],
+  "calibration": {
+    "seed": 1701,
+    "repetitionsPerMotion": 12,
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        60,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        12,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        12,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        12,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        12,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        12
+      ]
+    ],
+    "positiveCases": 84,
+    "positiveAccuracy": 1.0,
+    "negativeCases": 60,
+    "negativeFalsePositiveCases": 0,
+    "duplicates": 0,
+    "wrongTimeEvents": 0,
+    "perClass": {
+      "1": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "2": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "3": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "4": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "5": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "6": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "7": {
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "decisionFromForcePeakMs": {
+      "median": 170.0,
+      "max": 310.0
+    },
+    "clippedAxes": 0
+  },
+  "heldOut": {
+    "seed": 731091,
+    "repetitionsPerMotion": 100,
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        500,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        99,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        14,
+        0,
+        0,
+        0,
+        0,
+        86,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100
+      ]
+    ],
+    "positiveCases": 700,
+    "positiveAccuracy": 0.9785714285714285,
+    "negativeCases": 500,
+    "negativeFalsePositiveCases": 0,
+    "duplicates": 0,
+    "wrongTimeEvents": 0,
+    "perClass": {
+      "1": {
+        "precision": 1.0,
+        "recall": 0.99
+      },
+      "2": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "3": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "4": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "5": {
+        "precision": 1.0,
+        "recall": 0.86
+      },
+      "6": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "7": {
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "decisionFromForcePeakMs": {
+      "median": 170.0,
+      "max": 360.0
+    },
+    "clippedAxes": 3
+  },
+  "heldOutMisses": [
+    {
+      "motion": "forehand",
+      "seed": 731091083,
+      "expected": 1,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.75037665364127,
+        "amplitude": 0.864652216863955,
+        "noise": 0.8089769670371627,
+        "mount_deg": 0,
+        "left": true,
+        "lever_m": 0.23514015126802676
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091020,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.7522651987259625,
+        "amplitude": 0.9398043433129276,
+        "noise": 0.3223771427876267,
+        "mount_deg": 270,
+        "left": false,
+        "lever_m": 0.21574707004679883
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091025,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.7664296595260491,
+        "amplitude": 0.9269868922315132,
+        "noise": 0.48600253473823346,
+        "mount_deg": 180,
+        "left": true,
+        "lever_m": 0.2846908392822637
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091031,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.8310100778522842,
+        "amplitude": 0.997239414291698,
+        "noise": 0.8179143825831097,
+        "mount_deg": 180,
+        "left": true,
+        "lever_m": 0.2722492810142585
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091032,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.8374191135808973,
+        "amplitude": 0.9355238868068413,
+        "noise": 0.5962882044219049,
+        "mount_deg": 180,
+        "left": false,
+        "lever_m": 0.2787662588493208
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091033,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.9029556670064716,
+        "amplitude": 0.8561000081477921,
+        "noise": 1.0105966045929649,
+        "mount_deg": 0,
+        "left": true,
+        "lever_m": 0.2041934497853237
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091039,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.8047893374513668,
+        "amplitude": 0.8946751722141919,
+        "noise": 0.7915317388309531,
+        "mount_deg": 90,
+        "left": true,
+        "lever_m": 0.22331136007147617
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091062,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.7768880202878163,
+        "amplitude": 1.04577434400343,
+        "noise": 1.0164373364122343,
+        "mount_deg": 90,
+        "left": false,
+        "lever_m": 0.2680069906428407
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091064,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.8539606198517145,
+        "amplitude": 0.919800954092554,
+        "noise": 1.0019580670506485,
+        "mount_deg": 90,
+        "left": false,
+        "lever_m": 0.2295085535868217
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091065,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.7860337694483481,
+        "amplitude": 0.9271674130049832,
+        "noise": 1.1877469742117106,
+        "mount_deg": 0,
+        "left": true,
+        "lever_m": 0.2068453397545844
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091078,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.7881489095201347,
+        "amplitude": 0.9737686387699865,
+        "noise": 1.1678171496698284,
+        "mount_deg": 270,
+        "left": false,
+        "lever_m": 0.2925466789979181
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091079,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.8883320479024548,
+        "amplitude": 0.9376035633397184,
+        "noise": 0.8700696330252606,
+        "mount_deg": 180,
+        "left": true,
+        "lever_m": 0.278221897234484
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091093,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.8362512072238701,
+        "amplitude": 0.9452095332042394,
+        "noise": 0.42749259008878765,
+        "mount_deg": 90,
+        "left": true,
+        "lever_m": 0.2882148383494469
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091094,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.9562322922871738,
+        "amplitude": 0.852660162655219,
+        "noise": 0.6268116132557942,
+        "mount_deg": 180,
+        "left": false,
+        "lever_m": 0.2558876435473192
+      },
+      "clippedAxes": 0
+    },
+    {
+      "motion": "volley",
+      "seed": 731091095,
+      "expected": 5,
+      "predicted": 0,
+      "events": 0,
+      "calibrated": true,
+      "parameters": {
+        "speed": 0.7984035797811102,
+        "amplitude": 0.8901493252253251,
+        "noise": 1.1691605421637177,
+        "mount_deg": 180,
+        "left": true,
+        "lever_m": 0.26166613089595026
+      },
+      "clippedAxes": 0
+    }
+  ]
+}
