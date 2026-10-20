@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-20",
+  "scope": "Software synthetic replay and compile only. No firmware flash, physical IMU, radio or additional NU54 button actions.",
+  "reference": {
+    "repo": "https://github.com/hex-aragon/air-band",
+    "commit": "d89ce32a460b34c0cc740235dc9a76e74396a094",
+    "video": "https://www.youtube.com/watch?v=T8Lj7S-T7LY",
+    "article": "https://next-ai-agent.tistory.com/m/8",
+    "licenseFound": false,
+    "sourceCopied": false
+  },
+  "host": {
+    "suites": 4,
+    "passed": 4,
+    "addressAndUndefinedSanitizers": "4/4 passed",
+    "checks": [
+      "legacy calibration/gesture",
+      "transport/buttons",
+      "acceleration peak/window/clock",
+      "UART CSV to C replay"
+    ]
+  },
+  "replay": {
+    "source": "synthetic, not human sensor capture",
+    "samples": 375,
+    "kinds": [
+      1,
+      2,
+      3
+    ],
+    "power": [
+      17,
+      58,
+      100
+    ],
+    "uartConverterPass": true,
+    "packets": [
+      {
+        "time_ms": "1140",
+        "kind": "1",
+        "power": "17",
+        "yaw_cdeg": "5183",
+        "pitch_cdeg": "0",
+        "packet_hex": "44020103030074040000010001113f140000ff32"
+      },
+      {
+        "time_ms": "2290",
+        "kind": "2",
+        "power": "58",
+        "yaw_cdeg": "-5183",
+        "pitch_cdeg": "0",
+        "packet_hex": "440201030500f20800000200023ac1eb0000fff8"
+      },
+      {
+        "time_ms": "3440",
+        "kind": "3",
+        "power": "100",
+        "yaw_cdeg": "0",
+        "pitch_cdeg": "5183",
+        "packet_hex": "440201030700700d00000300036400003f14ffe4"
+      }
+    ]
+  },
+  "sdk": {
+    "repository": "digital-tennis-ble-unity",
+    "commit": "0b1847680e9bedcfa4f2bcce1f77d7bc4df83efa",
+    "checksPassed": 58,
+    "actualFirmwareBytesToCSharpCodecToSdkIntents": true,
+    "transport": "in-memory fixture; no radio"
+  },
+  "unity": {
+    "commit": "9c4767a5c7f69d2df7302bd9c2f948d84cc664ff",
+    "testSuite": "DigitalTennis.Tests.PacketControllerSceneTests",
+    "passed": 2,
+    "failed": 0,
+    "startUtc": "2026-10-20 06:04:25Z",
+    "endUtc": "2026-10-20 06:04:45Z",
+    "durationSeconds": 20.2271592,
+    "transport": "in-memory radio fixture, ordinary Unity adapter, no physical sensor",
+    "initialRun": "Cold launch failed with an unready scene null and a timeout; unchanged-code warm repeat passed both. Cold-start test timing remains a known limitation.",
+    "initialFailureSaved": true,
+    "xmlSha256": "5177a28bd272086bec2ac3f58065235b76117e1071544e8de54ed72a8631de8d"
+  },
+  "boards": {
+    "mpu6050": {
+      "board": "nu40dk_kit/nrf52840",
+      "compiled": true,
+      "traceEnabled": false,
+      "physicalRun": false,
+      "elfSha256": "f913298fa1d5fad05739ef7c772520f52d40aaf0efb462a905a681c4fe04a82c",
+      "hexSha256": "f667b9c4d4575633889904faba83d26e97371c2f4be059fb4b707e9b7a1d0bc8",
+      "configSha256": "3508061e18b23a27db3491736c8ea78be0b252b8d24be56b895ddec0a0e5e239",
+      "defaultPinsActiveSleepPinsDisconnected": true,
+      "driverEnabled": "CONFIG_MPU6050=y"
+    },
+    "lsm6dso": {
+      "board": "nu40dk_kit/nrf52840",
+      "compiled": true,
+      "traceEnabled": true,
+      "physicalRun": false,
+      "elfSha256": "36d93df891cd2e4d8bcdca0838697bd714bd36be6d47badd7dfa00fa6edbedb2",
+      "hexSha256": "246bd14e733898f3084cdba195eb0c24be011c4142ade030237ac2e594eef7cd",
+      "configSha256": "a5317b55a69049135326f85dc4d672c877f056344de6f519dbfe0913ae690dc6",
+      "defaultPinsActiveSleepPinsDisconnected": true,
+      "driverEnabled": "CONFIG_LSM6DSO=y"
+    },
+    "sensorless": {
+      "board": "nu40dk_kit/nrf52840",
+      "compiled": true,
+      "traceEnabled": false,
+      "physicalRun": false,
+      "elfSha256": "24e607c2b8145f3c687f9b6db76fc2a5284df4dddc2dee7c2dfacee70f9793ad",
+      "hexSha256": "5a5ed4b3c77225440a92f374c3e425fcfd84212743126aca071cf773b5f67e5f",
+      "configSha256": "3f1cd368c6763be31db5ffebb213f6e76a1e43dc6fc8ab0b812e9ae6d0316bcd"
+    },
+    "nu54-buttons": {
+      "board": "nu54v_dk/nrf54l15/cpuapp",
+      "compiled": true,
+      "traceEnabled": false,
+      "physicalRun": false,
+      "elfSha256": "cc6567e0d80aedcda6766607b9c13fd78f5767f4a30de2c3d01cce9ca9676c69",
+      "hexSha256": "9137b72b5e031b1bac17ee4013dc39f4671acada97972a55af192fc7f9f992c8",
+      "configSha256": "9e0d6a77ba230441b034b61a0ff3ecfd58eb1b34d5c4a8566986b614acd148a0"
+    }
+  },
+  "sourceHashes": {
+    "src/ap/dt_controller.c": "4bf4c70d097d84c279d62de96935f76a36b401a1c3f7d3660b5f23b3cb513b0e",
+    "src/common/dt_controller.h": "fed86fed33ea93599b91ea30bf3471acc0e052ca3323a2dba4f79ca3d0bebcc3",
+    "src/common/dt_sample_clock.h": "bebb8f31cb1767ac742523b613402e15b6c7428fb288613487dc88ae5accc474",
+    "src/hw/driver/external_imu.c": "bce7c5691b238f0f98906a3f0b85a61be943007ae69d1eea6c128dccc79001c5",
+    "src/hw/driver/imu_trace.c": "bd5ff5bdc7602263e5fdc342a790e447629d051c3a5f15ebbcfae63778c0197b",
+    "src/main.c": "49455713185240834d4e894d95b79e61ed714a1c3794c75e1877b1d9d06fec53",
+    "overlays/nu40-mpu6050.overlay": "40eabc4dd0bca05b38515790b8bed6450b036e350e0c38abfcb16090ed73de01",
+    "overlays/nu40-lsm6dso.overlay": "b96c4f6681b1a0e319768c6bb4e2ce5bbca6ad5381f52732bdaea46f2ac14cb4",
+    "tools/imu_replay.c": "877ccae87212d6e706d173e12e87cf1d54d625b9496725065c1bbf384d408f6c",
+    "tools/imu-trace-to-csv.py": "935137abf0a498f68c851125abed52bbb5d0ad63fbc13d7a236adea0b6a8cc80",
+    "tests/peak_checks.c": "1ca6f54ad45575fa2a88c64479f41d7f5ef2118c71e00d5e71bb3c7953d696d8",
+    "tests/replay_checks.py": "093746461449bf3bf4a6536566a0809367643ada070aaf29c85ee60519f1bf3e",
+    "CMakeLists.txt": "4cdf4a63ec4edd3aaeb035a89156291fa74abe37163f5df4cc89a79da79c1d2e",
+    "tools/build-board.py": "a7087dbaff21e63192107faf6b0ed75cf918579635e0dd03603d4c46234eeae4",
+    "overlays/nu40-imu-i2c.dtsi": "8d587c4281d2f5454e88ec499687c37504d7d454e414c059cf21cec09579cff0"
+  },
+  "deferred": [
+    "actual external sensor model/wiring/WHO_AM_I read",
+    "NU40 physical boot/6-axis samples",
+    "real gesture precision/recall and false positives",
+    "sample jitter and BLE/game end-to-end latency",
+    "physical Unity motion gameplay"
+  ],
+  "softwareAcceptance": "passed; physical sensor acceptance deferred",
+  "buildEnvironment": {
+    "ncs": "3.4.1",
+    "zephyr": "4.4.2",
+    "toolchain": "ccc010f809 / GNU 14.3.0",
+    "sensorFinalBuild": "pristine; avoids NCS generated Kconfig quote warnings during reconfigure"
+  }
+}

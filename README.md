@@ -42,7 +42,7 @@ flowchart LR
 
 ## 장비 없이 시작하기
 
-**CMake 3.20 이상, C99 컴파일러, Git**이 필요합니다. protocol 의존성은 검토한 커밋으로 자동 취득합니다.
+**CMake 3.20 이상, C99 컴파일러, Python 3, Git**이 필요합니다. protocol 의존성은 검토한 커밋으로 자동 취득합니다.
 
 ```sh
 git clone https://github.com/digital-tennis/digital-tennis-firmware.git
@@ -52,7 +52,11 @@ cmake --build .work/host
 ctest --test-dir .work/host --output-on-failure
 ```
 
-성공하면 `external_imu_pipeline`, `transport_and_buttons` 검사가 통과합니다. 모의 센서의 준비·보정·스윙과 버튼·송신 실패·만료를 확인하며 실제 보드를 변경하지 않습니다.
+성공하면 센서 준비·보정·기존 스윙, 버튼·송신, 가속도 피크·중복 방지, UART→CSV→패킷 재생의 네 검사가 통과합니다. 합성 입력 검사이며 실제 보드를 변경하지 않습니다.
+
+### 가속도 피크 기반 테니스 입력
+
+NU40 센서 앱은 100Hz 목표 취득과 최근20개6축 샘플 보관, 자이로 회전 구간 + 가속도 피크 판정으로 기존 v2 테니스 이벤트를 만듭니다. 선택 가능한 MPU6050/LSM6DSO overlay, 개발용 UART 기록과 동일 C 판정 코드의 CSV 재생 도구를 제공합니다. [Air Band 참고 분석·센서 설정·실행 가이드](docs/air-band-imu-adaptation.md)를 확인하세요. 센서가 없는 기본 빌드는 모션 입력을 만들지 않으며, 실제 배선·제스처 정확도·전체 지연은 후속 실물 검증이 필요합니다.
 
 로컬 protocol 소스를 사용하려면 첫 설정에 `-DDT_PROTOCOL_ROOT=/absolute/path/to/digital-tennis-protocol`을 추가합니다.
 

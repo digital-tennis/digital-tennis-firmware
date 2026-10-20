@@ -1,0 +1,16 @@
+/* LSM6DSO only (not LSM6DS3/DSL). Explicit example, NOT measured wiring.
+ * Review i2c0 P0.22 SDA / P0.21 SCL, voltage and SA0=high -> 0x6b. */
+#include <zephyr/dt-bindings/sensor/lsm6dso.h>
+#include "nu40-imu-i2c.dtsi"
+/ { aliases { external-imu = &tennis_lsm; }; };
+&i2c0 {
+ tennis_lsm: imu@6b {
+  compatible = "st,lsm6dso";
+  reg = <0x6b>;
+  accel-range = <LSM6DSO_DT_FS_16G>;
+  gyro-range = <LSM6DSO_DT_FS_2000DPS>;
+  accel-odr = <LSM6DSO_DT_ODR_104Hz>;
+  gyro-odr = <LSM6DSO_DT_ODR_104Hz>;
+  status = "okay";
+ };
+};

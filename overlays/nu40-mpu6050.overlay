@@ -1,0 +1,17 @@
+/* Selected example, NOT measured wiring. Review sensor, voltage, header and AD0.
+ * Uses this repository's i2c0 P0.22 SDA / P0.21 SCL, not Arduino Wire pins.
+ * Do not flash before completing docs/imu-developer-handoff.md section 20. */
+#include "nu40-imu-i2c.dtsi"
+/ { aliases { external-imu = &tennis_mpu; }; };
+&i2c0 {
+ tennis_mpu: imu@68 {
+  compatible = "invensense,mpu6050";
+  reg = <0x68>;
+  accel-fs = <16>;
+  gyro-fs = <2000>;
+  /* Driver does not program DLPF. Leave divider at 0, hardware ODR >= 1kHz.
+   * App reads at 100Hz; do NOT claim smplrt-div=9 is 100Hz on every chip. */
+  smplrt-div = <0>;
+  status = "okay";
+ };
+};
