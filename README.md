@@ -52,13 +52,17 @@ cmake --build .work/host
 ctest --test-dir .work/host --output-on-failure
 ```
 
-성공하면 센서 준비·보정·기존 스윙, 버튼·송신, 가속도 피크·중복 방지, UART→CSV→패킷 재생의 네 검사가 통과합니다. 합성 입력 검사이며 실제 보드를 변경하지 않습니다.
+성공하면 센서 준비·보정·기존 스윙, 버튼·송신, 가속도 피크·중복 방지, UART→CSV→패킷 재생, 7종 모션 특징, 가상 IMU 물리·연동, 임계값·양쪽 타격의 일곱 검사군이 통과합니다. 합성 입력 검사이며 실제 보드를 변경하지 않습니다.
 
 ### 가속도 피크 기반 테니스 입력
 
 NU40 센서 앱은 100Hz 목표 취득과 최근20개6축 샘플 보관, 자이로 회전 구간 + 가속도 피크 판정으로 기존 v2 테니스 이벤트를 만듭니다. 선택 가능한 MPU6050/LSM6DSO overlay, 개발용 UART 기록과 동일 C 판정 코드의 CSV 재생 도구를 제공합니다. [Air Band 참고 분석·센서 설정·실행 가이드](docs/air-band-imu-adaptation.md)를 확인하세요. 센서가 없는 기본 빌드는 모션 입력을 만들지 않으며, 실제 배선·제스처 정확도·전체 지연은 후속 실물 검증이 필요합니다.
 
 로컬 protocol 소스를 사용하려면 첫 설정에 `-DDT_PROTOCOL_ROOT=/absolute/path/to/digital-tennis-protocol`을 추가합니다.
+
+### 라켓 궤적을 만드는 가상 IMU 실험실
+
+[가상 센서 실험실](simulator/README.md)은 라켓의 3D 궤적에서 중력·회전 가속도·장착·잡음을 포함한 6축 값을 계산하고 동일 C 판정기로 포핸드·백핸드·서브·스매시·발리·슬라이스·로브 의도를 검토합니다. **실험용 7종 프로필**이며 기본 보드 앱을 자동 변경하지 않습니다. 서브와 스매시는 별도 경기 상태가 필요하고 이를 보드에 보내는 BLE 명령은 아직 없습니다. 실험으로 선택한 시작180/해제80deg/s·filter alpha0.4와 동작별 CSV 범위를 사용합니다. 새 합성 평가693/700 일치(백핸드5·발리2 누락), 일상 동작900개 오검출0과 피크 후 지연150ms(중앙값)를 기록했습니다. 실물 인식률과 다릅니다. [선택 근거·전후 비교·평가 기준](docs/threshold-experiment.md) · [추론·수정 위치·남은 통합](docs/tennis-gesture-simulator.md)
 
 ## 보드 빌드
 
@@ -93,6 +97,7 @@ python3 tools/build-board.py \
 | `src/ap/` | 보정·동작·버튼·송신 큐·BLE 서비스 |
 | `src/common/` | 플랫폼과 분리한 데이터·설정·포트 계약 |
 | `boards/`, `overlays/` | 보드 정의와 앱별 하드웨어 설정 |
+| `simulator/`, `config/gesture-rules.csv` | 가상 라켓·센서 생성, 실험용 C 특징 판정의 빌드 설정 |
 | `tests/`, `tools/` | 호스트 검사, 컴파일 fixture, 빌드·설치 도구 |
 
 [구조와 확장 방법](docs/architecture.md) · [보드 빌드 기록](docs/board-build-validation.json) · [모션·송신 검사 기록](docs/controller-refinement-validation.json) · [GPIO·본딩 빌드 기록](docs/bonding-build-validation.json)

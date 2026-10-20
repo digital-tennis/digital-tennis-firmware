@@ -90,3 +90,7 @@ NU54 보드 빌드만 DT_BUTTON_PROFILE을 명시합니다. vendored DTS의 SW1=
 ## IMU 피크 처리·개발 진단
 
 10ms deadline 기반 취득, 최근20개6축 원형 버퍼, MPU6050/LSM6DSO의 명시적 overlay와 선택적 UART→CSV 재생 도구는 [Air Band 참고 적용 문서](air-band-imu-adaptation.md)에 정리했다. 기본 빌드는 외장 IMU alias가 없으므로 모션을 만들지 않는다. 예제 overlay의 컴파일 성공은 실제 배선·샘플·사람 동작 인식 성공과 다르다.
+
+## 실험용 7종 모션과 가상 센서
+
+`dt_motion_gesture_defaults()`는 최근128개 raw 샘플의 방향·회전 범위·시간·일관성·가속도 특징을 CSV 규칙으로 비교합니다. 기본 `main.c`는 빠른 가속도 피크 프로필/논리20샘플을 유지하며, 자료형 버퍼의 정적 할당은128개입니다. 서버나 Unity에서 raw값을 모으는 구조로 바꾸지 않았습니다. 별도의 경기 상태가 없는 overhead는 서브/스매시를 구분하지 않습니다. 경기 상태 BLE 명령은 미구현입니다. [가상 궤적·C 재생·실물 인수 문서](tennis-gesture-simulator.md)에서 재현 방법·지연과 역할 경계를 확인합니다.

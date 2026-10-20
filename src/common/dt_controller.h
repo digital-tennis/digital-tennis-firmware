@@ -3,12 +3,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "dt_protocol.h"
-typedef struct { float acceleration[3],gyro_dps[3]; uint32_t time_ms; } dt_imu_sample;
+#include "dt_gesture.h"
 typedef struct { void *context; bool (*read)(void *context,dt_imu_sample *sample); } dt_imu_port;
 typedef struct { float axis[9],filter_alpha,trigger_dps,release_dps,serve_dps; uint32_t cooldown_ms; unsigned calibration_samples; bool left_handed; uint32_t max_gap_ms,min_swing_ms,max_swing_ms; float max_power_dps;
  bool acceleration_peak; float trigger_g,release_g,max_power_g;
+ bool recognize_gestures;
 } dt_motion_config;
-#define DT_IMU_WINDOW_CAPACITY 20
+#define DT_IMU_WINDOW_CAPACITY 128
 typedef struct { uint8_t kind; float min_yaw,max_yaw,min_pitch,max_pitch,min_peak,max_peak; uint32_t min_ms,max_ms; } dt_motion_rule;
 typedef struct {
  dt_imu_port imu;dt_motion_config config;
@@ -17,6 +18,7 @@ typedef struct {
  dt_motion_rule rules[8];unsigned rule_count;
  dt_imu_sample window[DT_IMU_WINDOW_CAPACITY];unsigned window_head,window_count;
  float acceleration_before,acceleration_previous;unsigned acceleration_count;
+ dt_gesture_context gesture_context;dt_gesture_result gesture_result;uint32_t gesture_attempts;
  float bias[3],sum[3],filtered[3];unsigned samples;
  uint16_t sequence,event_id,command_id;uint32_t last_time,last_swing,calibration_started,status_at;
  uint16_t command_history[64];uint8_t command_results[64];unsigned history_count,history_next;
@@ -24,6 +26,9 @@ typedef struct {
 dt_motion_config dt_motion_defaults(void);
 // Tennis peak profile: acceleration confirms contact intent; gyro supplies direction.
 dt_motion_config dt_motion_peak_defaults(void);
+// Experimental full-window recognizer; ordinary board app keeps peak defaults.
+dt_motion_config dt_motion_gesture_defaults(void);
+bool dt_controller_set_context(dt_controller *controller,dt_gesture_context context);
 // Oldest first, raw SI acceleration + deg/s, never serialized as a game packet.
 unsigned dt_controller_copy_window(const dt_controller *controller,dt_imu_sample *samples,unsigned capacity);
 bool dt_controller_init(dt_controller *controller,dt_imu_port port,dt_motion_config config);

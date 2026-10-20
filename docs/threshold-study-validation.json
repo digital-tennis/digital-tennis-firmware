@@ -1,0 +1,988 @@
+{
+  "document": "DT-HW-31-23-00",
+  "revision": "R01",
+  "date": "2026-10-20",
+  "scope": "Synthetic evidence only, no physical IMU or human accuracy",
+  "baseFeatureCommit": "b0db0789b28e6b101fb35dae09541d5700f9da10",
+  "protocolCommit": "a5ca8b516e33b277c22f9c3ae0cb5cd60ce65498",
+  "plan": {
+    "revision": "R02",
+    "scope": "Synthetic threshold selection; no human accuracy claim",
+    "train": {
+      "seed": 42017,
+      "perMotion": 24
+    },
+    "selection": {
+      "seed": 42029,
+      "perMotion": 24
+    },
+    "holdout": {
+      "seed": 52973,
+      "perMotion": 100
+    },
+    "variation": {
+      "speed": [
+        0.7,
+        1.3
+      ],
+      "amplitude": [
+        0.8,
+        1.2
+      ],
+      "noise": [
+        0.3,
+        1.6
+      ],
+      "lever_m": [
+        0.2,
+        0.3
+      ]
+    },
+    "bothStrokeSidesForKinds": [
+      5,
+      6,
+      7
+    ],
+    "detectors": {
+      "trigger_dps": [
+        140,
+        160,
+        180,
+        200,
+        220
+      ],
+      "release_dps": [
+        60,
+        80
+      ],
+      "filter_alpha": [
+        0.25,
+        0.4
+      ]
+    },
+    "rangeMarginMultipliers": [
+      1,
+      1.5,
+      2
+    ],
+    "selectionOrder": [
+      "zero negative false positives, wrong classes, duplicate events and wrong time",
+      "highest macro recall",
+      "highest worst-class recall",
+      "lower maximum decision latency",
+      "higher trigger threshold",
+      "smaller range margin"
+    ],
+    "acceptance": {
+      "minimumMacroRecall": 0.95,
+      "minimumClassRecall": 0.9,
+      "maximumNegativeFalsePositives": 0,
+      "maximumDuplicateCases": 0,
+      "maximumWrongTimeCases": 0,
+      "maximumWrongClasses": 0
+    },
+    "notes": [
+      "Fit ranges on train only; rank detector/range candidates on selection only",
+      "Never select or adjust a threshold using the holdout",
+      "Serve and smash share one overhead range and require explicit context",
+      "An identical accidental stroke is an irreducible intention counterexample, separate from benign negative metrics"
+    ]
+  },
+  "frozen": {
+    "planSha256": "586457f7452555932adf9f1fd885318b3906bf75d3f4eaaf2e807f7c21849769",
+    "physicsSha256": "4ce1e7b9d738e51f12d1474f9de1f23bc16e4f2a520d6477b7b651461c1eda2a",
+    "studySha256": "95f142074386dc026262c68a7bafadb8f6ac60fa6e4c393d5fd6bbec18a0fd8a",
+    "motionCsvSha256": "aa4058023022af8cdf728fdb9b9e83dd8a675fdbbf184f62fcb7ccd331a63529",
+    "binarySha256": "e97943686c961f54b61a29a30e70180f9ab6da2954b5c65e79aad53680b229f9",
+    "selectedRulesSha256": "2dc442533b4e9cc73a945cc022782e63c8535ed202a1a62a40fbc0d04fcfe4f0",
+    "selectedDetectorSha256": "fa7c75117c8439eee3a316530b05e149bef8390171b965d1affab4a3880a55c7",
+    "candidates": 60
+  },
+  "sourceSha256": {
+    "CMakeLists.txt": "05e1b12de9b67967affd36c39829038769b7f56543b92fdf39fdc7469ca56e8e",
+    "src/ap/dt_controller.c": "106a8006880a8b3524ea041e79ebb6b244c25466bdaeb07cd14c871ed77f2402",
+    "src/ap/dt_gesture.c": "f3b845b71a42b97b4cedd43d629dda44c025862ce19fb4dbf243fd66d4555377",
+    "src/common/dt_controller.h": "0f5577fbd21b10a1a0392bca703d560306d98d81befd6b62a7fe81bcc9e8754c",
+    "config/gesture-rules.csv": "2dc442533b4e9cc73a945cc022782e63c8535ed202a1a62a40fbc0d04fcfe4f0",
+    "config/gesture-detector.csv": "fa7c75117c8439eee3a316530b05e149bef8390171b965d1affab4a3880a55c7",
+    "tools/imu_replay.c": "4d56f8a748dc57cfe5b19975358f4b1f2b9246b30f267cf9cdb3702f36bb2a59",
+    "tools/generate-gesture-rules.py": "640aae4cc6846a13aa02adaad6ec353bc94c5f32fb4359425474e4deb28dce8c",
+    "simulator/physics.py": "4ce1e7b9d738e51f12d1474f9de1f23bc16e4f2a520d6477b7b651461c1eda2a",
+    "simulator/threshold_study.py": "95f142074386dc026262c68a7bafadb8f6ac60fa6e4c393d5fd6bbec18a0fd8a",
+    "simulator/threshold-plan.json": "586457f7452555932adf9f1fd885318b3906bf75d3f4eaaf2e807f7c21849769",
+    "tests/gesture_checks.c": "b05a9dbdd98b5612b80ba80caba8f6dcec1835b83a475791593212b34a9f07c9",
+    "tests/threshold_checks.py": "392610392fce63b7019aeb52b777147f4ab4f578300f7816ba854d1ad10d815e"
+  },
+  "detector": {
+    "filter_alpha": 0.4,
+    "trigger_dps": 180,
+    "release_dps": 80,
+    "cooldown_ms": 200,
+    "min_swing_ms": 20,
+    "max_swing_ms": 1000
+  },
+  "rules": [
+    {
+      "kind": 1,
+      "min_x": -0.151,
+      "max_x": 0.152,
+      "min_z": 0.85,
+      "max_z": 1,
+      "min_abs_z": 0.85,
+      "max_abs_z": 1,
+      "min_sweep": 97.818,
+      "max_sweep": 175.051,
+      "min_ms": 220.0,
+      "max_ms": 460.0,
+      "min_coherence": 0.92,
+      "min_g": 1.15,
+      "max_g": 28
+    },
+    {
+      "kind": 2,
+      "min_x": -0.151,
+      "max_x": 0.152,
+      "min_z": -1,
+      "max_z": -0.85,
+      "min_abs_z": 0.85,
+      "max_abs_z": 1,
+      "min_sweep": 99.772,
+      "max_sweep": 174.614,
+      "min_ms": 220.0,
+      "max_ms": 430.0,
+      "min_coherence": 0.92,
+      "min_g": 1.764,
+      "max_g": 28
+    },
+    {
+      "kind": 3,
+      "min_x": -1,
+      "max_x": -0.85,
+      "min_z": -0.152,
+      "max_z": 0.151,
+      "min_abs_z": 0,
+      "max_abs_z": 0.152,
+      "min_sweep": 102.757,
+      "max_sweep": 211.31,
+      "min_ms": 140.0,
+      "max_ms": 390.0,
+      "min_coherence": 0.92,
+      "min_g": 3.15,
+      "max_g": 28
+    },
+    {
+      "kind": 4,
+      "min_x": -1,
+      "max_x": -0.85,
+      "min_z": -0.152,
+      "max_z": 0.151,
+      "min_abs_z": 0,
+      "max_abs_z": 0.152,
+      "min_sweep": 102.757,
+      "max_sweep": 211.31,
+      "min_ms": 140.0,
+      "max_ms": 390.0,
+      "min_coherence": 0.92,
+      "min_g": 3.15,
+      "max_g": 28
+    },
+    {
+      "kind": 5,
+      "min_x": -0.153,
+      "max_x": 0.153,
+      "min_z": -1,
+      "max_z": 1,
+      "min_abs_z": 0.85,
+      "max_abs_z": 1,
+      "min_sweep": 12.711,
+      "max_sweep": 46.1,
+      "min_ms": 60.0,
+      "max_ms": 210.0,
+      "min_coherence": 0.92,
+      "min_g": 1.205,
+      "max_g": 28
+    },
+    {
+      "kind": 6,
+      "min_x": -0.83,
+      "max_x": -0.526,
+      "min_z": -0.865,
+      "max_z": 0.863,
+      "min_abs_z": 0.539,
+      "max_abs_z": 0.865,
+      "min_sweep": 55.473,
+      "max_sweep": 110.148,
+      "min_ms": 180.0,
+      "max_ms": 400.0,
+      "min_coherence": 0.889,
+      "min_g": 1.181,
+      "max_g": 28
+    },
+    {
+      "kind": 7,
+      "min_x": 0.527,
+      "max_x": 0.831,
+      "min_z": -0.863,
+      "max_z": 0.864,
+      "min_abs_z": 0.538,
+      "max_abs_z": 0.864,
+      "min_sweep": 57.685,
+      "max_sweep": 111.46,
+      "min_ms": 190.0,
+      "max_ms": 420.0,
+      "min_coherence": 0.888,
+      "min_g": 1.285,
+      "max_g": 28
+    }
+  ],
+  "train": {
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        216,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        24,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        24,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        24,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        24,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        23,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        24,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        24
+      ]
+    ],
+    "positiveCases": 168,
+    "negativeCases": 216,
+    "correctPositive": 167,
+    "macroRecall": 0.9940476190476191,
+    "worstClassRecall": 0.9583333333333334,
+    "classRecall": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.9583333333333334,
+      1.0,
+      1.0
+    ],
+    "negativeFalsePositiveCases": 0,
+    "duplicateCases": 0,
+    "wrongTimeCases": 0,
+    "wrongClasses": 0,
+    "decisionFromForcePeakMs": {
+      "median": 150.0,
+      "max": 360.0
+    },
+    "misses": [
+      {
+        "motion": "volley",
+        "expected": 5,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "volley",
+          "seed": 1616696015,
+          "speed": 0.7123845347891834,
+          "amplitude": 0.8144539899765524,
+          "noise": 0.35168558427420565,
+          "mount_deg": 90,
+          "left": false,
+          "lever_m": 0.21853755993382337,
+          "stroke_side": 1
+        }
+      }
+    ]
+  },
+  "selection": {
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        216,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        24,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        24,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        24,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        24,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        24,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        24,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        24
+      ]
+    ],
+    "positiveCases": 168,
+    "negativeCases": 216,
+    "correctPositive": 168,
+    "macroRecall": 1.0,
+    "worstClassRecall": 1.0,
+    "classRecall": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "negativeFalsePositiveCases": 0,
+    "duplicateCases": 0,
+    "wrongTimeCases": 0,
+    "wrongClasses": 0,
+    "decisionFromForcePeakMs": {
+      "median": 150.0,
+      "max": 350.0
+    },
+    "misses": []
+  },
+  "holdout": {
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        900,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        95,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0,
+        0,
+        98,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100
+      ]
+    ],
+    "positiveCases": 700,
+    "negativeCases": 900,
+    "correctPositive": 693,
+    "macroRecall": 0.99,
+    "worstClassRecall": 0.95,
+    "classRecall": [
+      1.0,
+      0.95,
+      1.0,
+      1.0,
+      0.98,
+      1.0,
+      1.0
+    ],
+    "negativeFalsePositiveCases": 0,
+    "duplicateCases": 0,
+    "wrongTimeCases": 0,
+    "wrongClasses": 0,
+    "decisionFromForcePeakMs": {
+      "median": 150.0,
+      "max": 360.0
+    },
+    "misses": [
+      {
+        "motion": "backhand",
+        "expected": 2,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "backhand",
+          "seed": 525586387,
+          "speed": 0.7159695492315331,
+          "amplitude": 1.0846025497544376,
+          "noise": 0.8170320042950718,
+          "mount_deg": 180,
+          "left": true,
+          "lever_m": 0.2940125790749614,
+          "stroke_side": 1
+        }
+      },
+      {
+        "motion": "backhand",
+        "expected": 2,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "backhand",
+          "seed": 1006995320,
+          "speed": 0.754068500808026,
+          "amplitude": 0.8480352370912804,
+          "noise": 0.5425969417828247,
+          "mount_deg": 90,
+          "left": false,
+          "lever_m": 0.2225064943327994,
+          "stroke_side": 1
+        }
+      },
+      {
+        "motion": "backhand",
+        "expected": 2,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "backhand",
+          "seed": 1880099726,
+          "speed": 0.720887145766463,
+          "amplitude": 0.9153090510957073,
+          "noise": 1.1007260388193616,
+          "mount_deg": 90,
+          "left": true,
+          "lever_m": 0.2567647325352127,
+          "stroke_side": 1
+        }
+      },
+      {
+        "motion": "backhand",
+        "expected": 2,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "backhand",
+          "seed": 1173919706,
+          "speed": 0.7726384670306767,
+          "amplitude": 0.8685661024822724,
+          "noise": 1.3423531387772798,
+          "mount_deg": 90,
+          "left": false,
+          "lever_m": 0.23572992829596506,
+          "stroke_side": 1
+        }
+      },
+      {
+        "motion": "backhand",
+        "expected": 2,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "backhand",
+          "seed": 1393243461,
+          "speed": 0.7064982090893843,
+          "amplitude": 0.9655692925099485,
+          "noise": 0.8413686692903828,
+          "mount_deg": 180,
+          "left": false,
+          "lever_m": 0.22655716967603048,
+          "stroke_side": 1
+        }
+      },
+      {
+        "motion": "volley",
+        "expected": 5,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "volley",
+          "seed": 1517013564,
+          "speed": 0.7279232218473818,
+          "amplitude": 0.8406557128217861,
+          "noise": 0.4655380787799428,
+          "mount_deg": 0,
+          "left": false,
+          "lever_m": 0.2430915411591975,
+          "stroke_side": -1
+        }
+      },
+      {
+        "motion": "volley",
+        "expected": 5,
+        "predicted": 0,
+        "events": [],
+        "parameters": {
+          "motion": "volley",
+          "seed": 1186057497,
+          "speed": 0.7353444400631598,
+          "amplitude": 0.8532321069417177,
+          "noise": 1.139531176495806,
+          "mount_deg": 0,
+          "left": true,
+          "lever_m": 0.28189965486247237,
+          "stroke_side": 1
+        }
+      }
+    ]
+  },
+  "baselineSameHoldout": {
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        900,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        2,
+        98,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        99,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0,
+        0
+      ],
+      [
+        31,
+        0,
+        0,
+        0,
+        0,
+        69,
+        0,
+        0
+      ],
+      [
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        98,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        99
+      ]
+    ],
+    "positiveCases": 700,
+    "negativeCases": 900,
+    "correctPositive": 663,
+    "macroRecall": 0.9471428571428572,
+    "worstClassRecall": 0.69,
+    "classRecall": [
+      0.98,
+      0.99,
+      1.0,
+      1.0,
+      0.69,
+      0.98,
+      0.99
+    ],
+    "negativeFalsePositiveCases": 0,
+    "duplicateCases": 0,
+    "wrongTimeCases": 0,
+    "wrongClasses": 0,
+    "decisionFromForcePeakMs": {
+      "median": 170.0,
+      "max": 380.0
+    }
+  },
+  "missDiagnostics": [
+    {
+      "motion": "backhand",
+      "seed": 525586387,
+      "diagnostics": [
+        {
+          "timeMs": 2930.0,
+          "failedRanges": [
+            "active_ms=440.0 outside [220.0, 430.0]"
+          ]
+        }
+      ]
+    },
+    {
+      "motion": "backhand",
+      "seed": 1006995320,
+      "diagnostics": [
+        {
+          "timeMs": 2830.0,
+          "failedRanges": [
+            "peak_g=1.52073 outside [1.764, 28]"
+          ]
+        }
+      ]
+    },
+    {
+      "motion": "backhand",
+      "seed": 1880099726,
+      "diagnostics": [
+        {
+          "timeMs": 2910.0,
+          "failedRanges": [
+            "peak_g=1.7248 outside [1.764, 28]"
+          ]
+        }
+      ]
+    },
+    {
+      "motion": "backhand",
+      "seed": 1173919706,
+      "diagnostics": [
+        {
+          "timeMs": 2800.0,
+          "failedRanges": [
+            "peak_g=1.69028 outside [1.764, 28]"
+          ]
+        }
+      ]
+    },
+    {
+      "motion": "backhand",
+      "seed": 1393243461,
+      "diagnostics": [
+        {
+          "timeMs": 2940.0,
+          "failedRanges": [
+            "active_ms=440.0 outside [220.0, 430.0]",
+            "peak_g=1.65291 outside [1.764, 28]"
+          ]
+        }
+      ]
+    },
+    {
+      "motion": "volley",
+      "seed": 1517013564,
+      "diagnostics": [
+        "No eligible detection window; start/minimum-duration gate, not a different class."
+      ]
+    },
+    {
+      "motion": "volley",
+      "seed": 1186057497,
+      "diagnostics": [
+        "No eligible detection window; start/minimum-duration gate, not a different class."
+      ]
+    }
+  ],
+  "passed": true,
+  "acceptance": {
+    "minimumMacroRecall": 0.95,
+    "minimumClassRecall": 0.9,
+    "maximumNegativeFalsePositives": 0,
+    "maximumDuplicateCases": 0,
+    "maximumWrongTimeCases": 0,
+    "maximumWrongClasses": 0
+  },
+  "checks": {
+    "hostSuitesPassed": 7,
+    "sanitizerSuitesPassed": 7,
+    "physicsIntegrationCases": 9,
+    "thresholdBoundaryAndBothSideCases": 6,
+    "cPythonEveryDecisionParity": true,
+    "sameTrajectoryContextCounterexample": {
+      "sameSixAxisValues": true,
+      "sensorTraceSha256": "63b7ae5bd1b0cb2d8063c80fea4d1b0e24b099a5986f3dddf9a5a1e6fc503819",
+      "unknownContext": "rejects ambiguous serve/smash",
+      "serveContext": 3,
+      "rallyContext": 4,
+      "identicalIntentCounterexample": {
+        "metadataExpected": 0,
+        "observedKind": 1,
+        "meaning": "Changing an intention label cannot change identical inertial inputs; this hard negative is not one of the 500 benign negative cases."
+      },
+      "note": "Context disambiguation, not distinct IMU patterns or a new learned skill."
+    },
+    "sevenActualCPacketsThroughUnchangedCSharpSdk": true,
+    "sdkTransport": "in-memory fixture; no physical BLE or Unity play"
+  },
+  "boardBuilds": [
+    {
+      "name": "nu40-mpu6050",
+      "ordinaryBoardProfile": true,
+      "compileOnly": true,
+      "elfSha256": "b6c7c16126429463250c0f05afa77c9635cb673eb2b5e6c22848abbc83d3228b",
+      "memoryBytes": {
+        "FLASH": 203152,
+        "RAM": 42988
+      },
+      "drivers": {
+        "CONFIG_MPU6050": true,
+        "CONFIG_LSM6DSO": false,
+        "CONFIG_SENSOR": true
+      }
+    },
+    {
+      "name": "nu40-lsm6dso",
+      "ordinaryBoardProfile": true,
+      "compileOnly": true,
+      "elfSha256": "f2f9eebb68883557aaa1798504e4a71849b15dae0e5d205c3cb4bf8ffa4e66ac",
+      "memoryBytes": {
+        "FLASH": 205804,
+        "RAM": 45676
+      },
+      "drivers": {
+        "CONFIG_MPU6050": false,
+        "CONFIG_LSM6DSO": true,
+        "CONFIG_SENSOR": true
+      }
+    },
+    {
+      "name": "nu40-sensorless",
+      "ordinaryBoardProfile": true,
+      "compileOnly": true,
+      "elfSha256": "e3b6ffb5ce957db710c069ec1a2c038f44399b839c1f82d04eb46da62f99e5c3",
+      "memoryBytes": {
+        "FLASH": 199068,
+        "RAM": 42988
+      },
+      "drivers": {
+        "CONFIG_MPU6050": false,
+        "CONFIG_LSM6DSO": false,
+        "CONFIG_SENSOR": true
+      }
+    },
+    {
+      "name": "nu54-buttons",
+      "ordinaryBoardProfile": true,
+      "compileOnly": true,
+      "elfSha256": "60c87dac3eba1b4da37e540320b73b5797f06e6f1c7d7538bde657357c026613",
+      "memoryBytes": {
+        "FLASH": 195892,
+        "RAM": 40428
+      },
+      "drivers": {
+        "CONFIG_MPU6050": false,
+        "CONFIG_LSM6DSO": false,
+        "CONFIG_SENSOR": true
+      }
+    }
+  ],
+  "finalBinarySha256": "78db376a040dbc8a21b552cb13eca39490fbe3d7e139d3ad022a367eebef3942",
+  "baselineBinarySha256": "2f85a590c2d886eb7cf1e3d5177f168456890a282675e9dc0e3a991d9ea622b5",
+  "datasetManifestSha256": {
+    "train": "89e444aaeddb674e0f6cbfc23354a3a6fdd4be67f6cd205ae0e72a0515c82853",
+    "selection": "d0a12cb174e3e61b14b0cd15d79312f76388d7e49680e46aa2157079a7e76a43",
+    "holdout": "dab65e8a92026b1dd74ff53ec1a620b8751cd261cb68953266566f1ad57a2ec3"
+  },
+  "limitations": [
+    "Synthetic fixed-grip families, not measured human precision/recall",
+    "Backhand decreased from 99/100 to 95/100 on the same holdout; retained rather than adjusting after opening test",
+    "No physical IMU, board flash or additional button test",
+    "No current BLE command sends match context to the board",
+    "Ordinary board app retains fast peak profile; learned CSV applies to explicit full-window gesture profile",
+    "Latency is from synthetic acceleration peak to decision, not CPU time or total BLE/Unity delay"
+  ]
+}
