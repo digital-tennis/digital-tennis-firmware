@@ -18,7 +18,7 @@ typedef struct {
  dt_motion_rule rules[8];unsigned rule_count;
  dt_imu_sample window[DT_IMU_WINDOW_CAPACITY];unsigned window_head,window_count;
  float acceleration_before,acceleration_previous;unsigned acceleration_count;
- dt_gesture_context gesture_context;dt_gesture_result gesture_result;uint32_t gesture_attempts;
+ dt_gesture_result gesture_result;uint32_t gesture_attempts;
  float bias[3],sum[3],filtered[3];unsigned samples;
  uint16_t sequence,event_id,command_id;uint32_t last_time,last_swing,calibration_started,status_at;
  uint16_t command_history[64];uint8_t command_results[64];unsigned history_count,history_next;
@@ -26,9 +26,10 @@ typedef struct {
 dt_motion_config dt_motion_defaults(void);
 // Tennis peak profile: acceleration confirms contact intent; gyro supplies direction.
 dt_motion_config dt_motion_peak_defaults(void);
-// Experimental full-window recognizer; ordinary board app keeps peak defaults.
+// Default board profile: context-free full-window physical events (wire v3).
+dt_motion_config dt_motion_physical_defaults(void);
+// Source compatibility alias; now explicitly emits physical v3 events.
 dt_motion_config dt_motion_gesture_defaults(void);
-bool dt_controller_set_context(dt_controller *controller,dt_gesture_context context);
 // Oldest first, raw SI acceleration + deg/s, never serialized as a game packet.
 unsigned dt_controller_copy_window(const dt_controller *controller,dt_imu_sample *samples,unsigned capacity);
 bool dt_controller_init(dt_controller *controller,dt_imu_port port,dt_motion_config config);
@@ -36,6 +37,7 @@ bool dt_controller_init(dt_controller *controller,dt_imu_port port,dt_motion_con
 bool dt_controller_tick(dt_controller *controller,dt_packet *output);
 bool dt_controller_command(dt_controller *controller,const dt_packet *command,uint32_t now,dt_packet *response);
 bool dt_controller_button(dt_controller *controller,uint8_t kind,uint32_t now,dt_packet *output);
+bool dt_controller_button_edge(dt_controller *controller,uint8_t number,bool down,uint32_t now,dt_packet *output);
 bool dt_controller_set_mode(dt_controller *controller,uint8_t kind);
 bool dt_controller_set_rules(dt_controller *controller,const dt_motion_rule *rules,unsigned count);
 bool dt_controller_intent(dt_controller *controller,uint8_t kind,uint32_t now,dt_packet *output);

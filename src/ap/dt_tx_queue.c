@@ -13,7 +13,7 @@ bool dt_tx_enqueue(dt_tx_queue *q,const dt_packet *p,uint32_t now){
 bool dt_tx_next(dt_tx_queue *q,uint32_t now,dt_packet *p,uint32_t *ticket){
  if(!q||!q->linked||!p||!ticket)return false;
  while(q->count){
-  dt_tx_entry *e=&q->entries[q->head];uint32_t ttl=e->packet.type==1||e->packet.type==2?200:1000;
+  dt_tx_entry *e=&q->entries[q->head];uint32_t ttl=e->packet.type>=1&&e->packet.type<=6&&e->packet.type!=3?200:1000;
   if((uint32_t)(now-e->queued_at)>ttl){pop(q);q->expired++;continue;}
   if((int32_t)(now-e->due_at)<0)return false;
   *p=e->packet;p->sequence=++q->sequence;*ticket=e->ticket;e->due_at=now+20;return true;

@@ -8,7 +8,7 @@ def generate(source,destination,detector=None):
         reader=csv.DictReader(f)
         if reader.fieldnames!=FIELDS: raise ValueError('Unexpected gesture CSV header')
         rows=list(reader)
-    if len(rows)!=7: raise ValueError('Exactly seven tennis rules are required')
+    if len(rows)!=6: raise ValueError('Exactly six physical motion rules are required')
     generated=[]
     for kind,row in enumerate(rows,1):
         if set(row)!=set(FIELDS) or any(v is None for v in row.values()): raise ValueError('Malformed rule')
@@ -19,7 +19,7 @@ def generate(source,destination,detector=None):
             if not low<=v[lo]<=v[hi]<=high: raise ValueError('Invalid '+lo+'/'+hi)
         if not 0<=v['min_coherence']<=1:raise ValueError('Invalid coherence')
         generated.append('{'+str(kind)+','+','.join(format(x,'.9e')+'f' for x in values[1:])+'}')
-    header='// Generated from reviewed gesture CSV files. Do not edit.\n#ifdef DT_GESTURE_INCLUDE_RULES\nstatic const dt_gesture_rule gesture_rules[7]={\n'+',\n'.join(generated)+'\n};\n#endif\n'
+    header='// Generated from reviewed gesture CSV files. Do not edit.\n#ifdef DT_GESTURE_INCLUDE_RULES\nstatic const dt_gesture_rule gesture_rules[6]={\n'+',\n'.join(generated)+'\n};\n#endif\n'
     if detector:
         keys='filter_alpha,trigger_dps,release_dps,cooldown_ms,min_swing_ms,max_swing_ms'.split(',')
         with detector.open(newline='') as f:

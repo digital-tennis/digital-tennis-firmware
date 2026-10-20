@@ -70,13 +70,13 @@ def dataset(phase,folder):
                 force_peak=max((f for f in data['frames'] if data['start_ms']<=f['time_ms']<=data['end_ms']),key=lambda f:sum(v*v for v in f['sensor'][:3]))['time_ms']
                 case={k:data[k] for k in ['expected','parameters','axis','start_ms','end_ms','clippedAxes']}
                 case.update(csvSha256=sha(path),forcePeakMs=force_peak);save(metadata,case)
-            cases.append(dict(case,path=str(path),context='serve' if name=='serve' else 'rally'))
+            cases.append(dict(case,path=str(path)))
     return cases
 
 def observe(cases,binary,detector=None):
     records=[]
     for case in cases:
-        args=[str(Path(binary).resolve()),'--gestures','--diagnostics','--context='+case['context'],'--axis='+','.join(format(x,'.9g') for x in case['axis'])]
+        args=[str(Path(binary).resolve()),'--physical','--diagnostics','--axis='+','.join(format(x,'.9g') for x in case['axis'])]
         if case['parameters']['left']:args.append('--left')
         if detector:
             args.extend('--'+key.replace('_','-')+'='+str(detector[key]) for key in ['trigger_dps','release_dps','filter_alpha'])
@@ -86,7 +86,7 @@ def observe(cases,binary,detector=None):
         records.append({'case':case,'decisions':decisions})
     return records
 
-def predict(feature,rules,context):
+def predict(feature,rules):
     if feature['active_ms']<=0:return 0
     x,z=feature['direction_x'],feature['direction_z'];matched=[]
     for r in rules:
@@ -94,18 +94,17 @@ def predict(feature,rules,context):
             r['min_abs_z']<=abs(z)<=r['max_abs_z'] and r['min_sweep']<=feature['sweep_deg']<=r['max_sweep'] and
             r['min_ms']<=feature['active_ms']<=r['max_ms'] and feature['coherence']>=r['min_coherence'] and
             r['min_g']<=feature['peak_g']<=r['max_g']):matched.append(int(r['kind']))
-    eligible=[k for k in matched if not (context=='serve' and k==4 or context=='rally' and k==3)]
+    eligible=matched
     return eligible[0] if len(eligible)==1 else 0
 
 def fitted_rules(records,margin):
     # Coordinate families encode the stroke hypotheses; numerical ranges come
     # from C features on the training split, with declared expansion margins.
-    groups={kind:[] for kind in range(1,8)}
+    groups={kind:[] for kind in range(1,7)}
     for record in records:
         case=record['case'];expected=case['expected']
         if expected:
             groups[expected].extend(d for d in record['decisions'] if case['start_ms']<=d['time_ms']<=case['end_ms']+250 and d['active_ms']>0)
-    overhead=groups[3]+groups[4];groups[3]=groups[4]=overhead
     rules=[]
     for kind,features in groups.items():
         if not features:return None
@@ -122,11 +121,11 @@ def fitted_rules(records,margin):
     return rules
 
 def score(records,rules=None):
-    matrix=[[0]*8 for _ in range(8)];duplicate_cases=wrong_time=wrong_classes=0;latencies=[];misses=[]
+    matrix=[[0]*7 for _ in range(7)];duplicate_cases=wrong_time=wrong_classes=0;latencies=[];misses=[]
     for record in records:
         case=record['case'];events=[]
         for decision in record['decisions']:
-            kind=predict(decision,rules,case['context']) if rules is not None else int(decision['kind'])
+            kind=predict(decision,rules) if rules is not None else int(decision['kind'])
             if kind:events.append((kind,decision['time_ms']))
         expected=case['expected'];predicted=events[0][0] if len(events)==1 else 0;matrix[expected][predicted]+=1
         duplicate_cases+=int(len(events)>1)
@@ -134,10 +133,10 @@ def score(records,rules=None):
         wrong_time+=int(expected>0 and any(not case['start_ms']<=time<=case['end_ms']+250 for _,time in events))
         if expected and events:latencies.append(events[0][1]-case['forcePeakMs'])
         if expected and predicted!=expected:misses.append({'motion':case['parameters']['motion'],'expected':expected,'predicted':predicted,'events':events,'parameters':case['parameters']})
-    recalls=[matrix[k][k]/max(1,sum(matrix[k])) for k in range(1,8)]
+    recalls=[matrix[k][k]/max(1,sum(matrix[k])) for k in range(1,7)]
     # Count *cases with events*, including a duplicate pair whose matrix entry is 0.
-    negative_fp=sum(int(r['case']['expected']==0 and any((predict(d,rules,r['case']['context']) if rules is not None else d['kind'])>0 for d in r['decisions'])) for r in records)
-    return {'matrixRowsExpectedColumnsPredicted':matrix,'positiveCases':sum(sum(row) for row in matrix[1:]),'negativeCases':sum(matrix[0]),'correctPositive':sum(matrix[k][k] for k in range(1,8)),'macroRecall':statistics.mean(recalls),'worstClassRecall':min(recalls),'classRecall':recalls,'negativeFalsePositiveCases':negative_fp,'duplicateCases':duplicate_cases,'wrongTimeCases':wrong_time,'wrongClasses':wrong_classes,'decisionFromForcePeakMs':{'median':statistics.median(latencies) if latencies else None,'max':max(latencies) if latencies else None},'misses':misses}
+    negative_fp=sum(int(r['case']['expected']==0 and any((predict(d,rules) if rules is not None else d['kind'])>0 for d in r['decisions'])) for r in records)
+    return {'matrixRowsExpectedColumnsPredicted':matrix,'positiveCases':sum(sum(row) for row in matrix[1:]),'negativeCases':sum(matrix[0]),'correctPositive':sum(matrix[k][k] for k in range(1,7)),'macroRecall':statistics.mean(recalls),'worstClassRecall':min(recalls),'classRecall':recalls,'negativeFalsePositiveCases':negative_fp,'duplicateCases':duplicate_cases,'wrongTimeCases':wrong_time,'wrongClasses':wrong_classes,'decisionFromForcePeakMs':{'median':statistics.median(latencies) if latencies else None,'max':max(latencies) if latencies else None},'misses':misses}
 
 def feasible(s):return not any(s[k] for k in ['negativeFalsePositiveCases','duplicateCases','wrongTimeCases','wrongClasses'])
 def write_rules(path,rules):

@@ -15,15 +15,14 @@ class ThresholdChecks(unittest.TestCase):
                         p=presets()[name];p.update(back_z=p['back_z']*side,front_z=p['front_z']*side)
                         pose,start,end,total=make_pose(p,left=left)
                         data=sample_trajectory(pose,start,end,total,name,int(p['kind']),seed=451,left=left)
-                        recognize(data,sys.argv[1],'rally')
+                        recognize(data,sys.argv[1])
                         self.assertEqual([int(e['kind']) for e in data['recognition']['events']],[int(p['kind'])])
 
-    def test_context_is_not_a_sensor_label(self):
-        feature=dict(active_ms=200,direction_x=-1,direction_z=0,sweep_deg=100,coherence=1,peak_g=5)
-        rules=[dict(kind=k,min_x=-1,max_x=-.8,min_z=-.2,max_z=.2,min_abs_z=0,max_abs_z=.2,min_sweep=40,max_sweep=200,min_ms=40,max_ms=900,min_coherence=.8,min_g=2,max_g=28) for k in [3,4]]
-        self.assertEqual(predict(feature,rules,'unknown'),0)
-        self.assertEqual(predict(feature,rules,'serve'),3)
-        self.assertEqual(predict(feature,rules,'rally'),4)
+    def test_overlapping_physical_ranges_reject_without_game_context(self):
+        f=dict(active_ms=200,direction_x=-1,direction_z=0,sweep_deg=100,coherence=1,peak_g=5)
+        rule=dict(kind=3,min_x=-1,max_x=-.8,min_z=-.2,max_z=.2,min_abs_z=0,max_abs_z=.2,min_sweep=40,max_sweep=200,min_ms=40,max_ms=900,min_coherence=.8,min_g=2,max_g=28)
+        self.assertEqual(predict(f,[rule]),3)
+        self.assertEqual(predict(f,[rule,dict(rule,kind=4)]),0)
 
     def test_duplicate_negative_cannot_hide_in_unknown_matrix_cell(self):
         record={'case':{'expected':0,'start_ms':1200,'end_ms':2000,'forcePeakMs':1600,'parameters':{}},'decisions':[{'kind':1,'time_ms':1500},{'kind':1,'time_ms':1700}]}
