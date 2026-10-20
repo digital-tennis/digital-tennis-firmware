@@ -1,6 +1,11 @@
 / {
     chosen { zephyr,settings-partition = &tennis_bonds; };
     aliases {
+        controller-button-1 = &button0;
+        controller-button-2 = &button1;
+        controller-button-3 = &button2;
+        controller-button-4 = &button3;
+
         racket-serve = &button0;
         racket-forehand = &button1;
         racket-backhand = &button2;

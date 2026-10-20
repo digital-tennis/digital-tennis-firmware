@@ -17,12 +17,12 @@ static bool mapped_gyro(const dt_imu_sample *s,const float axis[9],const float b
  return true;
 }
 static const dt_imu_sample *at(const dt_imu_sample *s,unsigned count,unsigned head,unsigned capacity,unsigned index){return &s[(head+capacity-count+index)%capacity];}
-dt_gesture_result dt_gesture_classify(const dt_imu_sample *s,unsigned count,const float axis[9],const float bias[3],bool left,float release,dt_gesture_context context){
- return dt_gesture_classify_ring(s,count,0,count,axis,bias,left,release,context);
+dt_gesture_result dt_gesture_classify(const dt_imu_sample *s,unsigned count,const float axis[9],const float bias[3],bool left,float release){
+ return dt_gesture_classify_ring(s,count,0,count,axis,bias,left,release);
 }
-dt_gesture_result dt_gesture_classify_ring(const dt_imu_sample *s,unsigned count,unsigned head,unsigned capacity,const float axis[9],const float bias[3],bool left,float release,dt_gesture_context context){
+dt_gesture_result dt_gesture_classify_ring(const dt_imu_sample *s,unsigned count,unsigned head,unsigned capacity,const float axis[9],const float bias[3],bool left,float release){
  dt_gesture_result result={.reason=DT_GESTURE_INVALID};
- if(!s||!axis||!bias||count<2||count>capacity||capacity>128||head>=capacity||!isfinite(release)||release<=0||(unsigned)context>DT_CONTEXT_RALLY)return result;
+ if(!s||!axis||!bias||count<2||count>capacity||capacity>128||head>=capacity||!isfinite(release)||release<=0)return result;
  unsigned end=count;float gyro[3];
  // Ignore the filtered detector's quiet tail, never look at future samples.
  while(end){if(!mapped_gyro(at(s,count,head,capacity,end-1),axis,bias,left,gyro))return result;if(norm(gyro)>=release)break;end--;}
@@ -51,15 +51,13 @@ dt_gesture_result dt_gesture_classify_ring(const dt_imu_sample *s,unsigned count
  result.features.sweep_deg=path;result.features.active_ms=(float)(uint32_t)(at(s,count,head,capacity,end-1)->time_ms-at(s,count,head,capacity,begin)->time_ms);
  result.features.coherence=fminf(1,norm(integral)/path);
  const dt_gesture_features *f=&result.features;
- for(unsigned i=0;i<7;i++){
+ for(unsigned i=0;i<6;i++){
   const dt_gesture_rule *r=&gesture_rules[i];float az=fabsf(f->direction_z);
   if(f->direction_x>=r->min_x&&f->direction_x<=r->max_x&&f->direction_z>=r->min_z&&f->direction_z<=r->max_z&&az>=r->min_abs_z&&az<=r->max_abs_z&&f->sweep_deg>=r->min_sweep&&f->sweep_deg<=r->max_sweep&&f->active_ms>=r->min_ms&&f->active_ms<=r->max_ms&&f->coherence>=r->min_coherence&&f->peak_g>=r->min_g&&f->peak_g<=r->max_g)result.candidates|=(uint16_t)(1U<<r->kind);
  }
  uint16_t eligible=result.candidates;
- if(context==DT_CONTEXT_SERVE)eligible&=(uint16_t)~(1U<<4);
- if(context==DT_CONTEXT_RALLY)eligible&=(uint16_t)~(1U<<3);
  if(!eligible){result.reason=DT_GESTURE_UNMATCHED;return result;}
- if(eligible&(eligible-1)){result.reason=context==DT_CONTEXT_UNKNOWN&&(eligible&24)==24?DT_GESTURE_CONTEXT:DT_GESTURE_AMBIGUOUS;return result;}
- for(uint8_t i=1;i<=7;i++)if(eligible==(1U<<i))result.kind=i;
+ if(eligible&(eligible-1)){result.reason=DT_GESTURE_AMBIGUOUS;return result;}
+ for(uint8_t i=1;i<=6;i++)if(eligible==(1U<<i))result.kind=i;
  result.reason=DT_GESTURE_OK;return result;
 }

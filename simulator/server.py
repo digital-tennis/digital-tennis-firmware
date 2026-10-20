@@ -23,14 +23,14 @@ class Handler(BaseHTTPRequestHandler):
             length=int(self.headers.get('Content-Length','0'))
             if not 0<length<=4096 or self.headers.get_content_type()!='application/json':raise ValueError('request')
             data=json.loads(self.rfile.read(length))
-            if not isinstance(data,dict) or set(data)-{'motion','seed','speed','amplitude','noise','mount_deg','left','context'}:raise ValueError('fields')
+            if not isinstance(data,dict) or set(data)-{'motion','seed','speed','amplitude','noise','mount_deg','left'}:raise ValueError('fields')
             seed=data.get('seed',1)
             if type(seed) is not int or not 0<=seed<=2147483647 or type(data.get('left',False)) is not bool:raise ValueError('type')
             numeric={k:data.get(k,v) for k,v in [('speed',1),('amplitude',1),('noise',1),('mount_deg',0)]}
             if any(type(v) not in [int,float] for v in numeric.values()):raise ValueError('number')
             case=generate(data.get('motion','forehand'),seed=seed,left=data.get('left',False),**numeric)
-            self.respond(200,recognize(case,self.binary,data.get('context','unknown')))
-        except (ValueError,TypeError,KeyError):self.respond(400,{'error':'실험 값과 경기 상황을 확인해 주세요.'})
+            self.respond(200,recognize(case,self.binary))
+        except (ValueError,TypeError,KeyError):self.respond(400,{'error':'실험 값과 물리 궤적을 확인해 주세요.'})
         except Exception:self.respond(500,{'error':'C 재생기를 실행하지 못했습니다. 빌드와 서버 로그를 확인해 주세요.'})
     def log_message(self,format,*args):pass
 def main():

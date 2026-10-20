@@ -1,0 +1,291 @@
+{
+  "scope": "Kinematic synthetic consistency only; not human gesture accuracy",
+  "ruleSha256": "7eaa03e06674c4e7e25fda95ada52f65f7854648900046b6d0240b49f9c21afa",
+  "motionPresetSha256": "25d3057ef446de7e2c0c31cfbf0e9bb365e38766c5b4bba95b140fe81b66a3b3",
+  "nominal": {
+    "forehand": [
+      1
+    ],
+    "backhand": [
+      2
+    ],
+    "serve": [
+      3
+    ],
+    "smash": [
+      3
+    ],
+    "volley": [
+      4
+    ],
+    "slice": [
+      5
+    ],
+    "lob": [
+      6
+    ]
+  },
+  "ambiguity": {
+    "sameWaveformSamePhysicalPacket": true,
+    "kind": 3,
+    "meaning": "Game context is not a firmware input. Serve/Smash is decided by the game."
+  },
+  "limitations": [
+    "Assumed fixed grip/body frame and stylized paths; no anatomy/soft tissue/ball impulse model",
+    "Full-window recognition waits for rotation release and is now the ordinary physical board profile; measured synthetic latency is not wireless latency",
+    "A deliberate stroke and an identical accidental motion cannot be distinguished by these six channels",
+    "No match state is sent to the board; game resolves physical events",
+    "No physical IMU, flash or additional NU54 button testing"
+  ],
+  "calibration": {
+    "seed": 1701,
+    "repetitionsPerMotion": 12,
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        60,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        12,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        12,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        24,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        12,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        12,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        12
+      ]
+    ],
+    "positiveCases": 84,
+    "positiveAccuracy": 1.0,
+    "negativeCases": 60,
+    "negativeFalsePositiveCases": 0,
+    "duplicates": 0,
+    "wrongTimeEvents": 0,
+    "perClass": {
+      "1": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "2": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "3": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "4": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "5": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "6": {
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "decisionFromForcePeakMs": {
+      "median": 150.0,
+      "max": 290.0
+    },
+    "failureRecords": []
+  },
+  "heldOut": {
+    "seed": 741103,
+    "repetitionsPerMotion": 100,
+    "matrixRowsExpectedColumnsPredicted": [
+      [
+        500,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        99,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        200,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        100,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        100,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        100
+      ]
+    ],
+    "positiveCases": 700,
+    "positiveAccuracy": 0.9985714285714286,
+    "negativeCases": 500,
+    "negativeFalsePositiveCases": 0,
+    "duplicates": 0,
+    "wrongTimeEvents": 0,
+    "perClass": {
+      "1": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "2": {
+        "precision": 1.0,
+        "recall": 0.99
+      },
+      "3": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "4": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "5": {
+        "precision": 1.0,
+        "recall": 1.0
+      },
+      "6": {
+        "precision": 1.0,
+        "recall": 1.0
+      }
+    },
+    "decisionFromForcePeakMs": {
+      "median": 150.0,
+      "max": 330.0
+    },
+    "failureRecords": [
+      {
+        "motion": "backhand",
+        "seed": 741103060,
+        "expected": 2,
+        "predicted": 0,
+        "events": 0,
+        "calibrated": true,
+        "parameters": {
+          "speed": 0.7940279895187967,
+          "amplitude": 0.8688331460377765,
+          "noise": 0.772541276580935,
+          "mount_deg": 0,
+          "left": false,
+          "lever_m": 0.22609982026348993
+        },
+        "clippedAxes": 0
+      }
+    ]
+  },
+  "reproduce": "python3 simulator/evaluate.py --binary .work/physical-events/imu_replay --repetitions 100 --validation-seed 741103 --out .work/physical-events/synthetic-evaluation.json",
+  "notRetunedForThisSeed": true,
+  "boards": {
+    "nu40-mpu6050": {
+      "compiled": true,
+      "elfSha256": "7a460d76626031c11a6c1714b3a6d4e15fb7bc0a6b86c775cc92fb114a0b4820"
+    },
+    "nu40-lsm6dso": {
+      "compiled": true,
+      "elfSha256": "d0670d09672ccb00bfd49749d67a2f7333e4cba5ed4e90e69009bfd2a57d239b"
+    },
+    "nu40-sensorless": {
+      "compiled": true,
+      "elfSha256": "af39078f99d7324c76b71971e7fc05f0486caf691bf97eaa8d66096afaedd63b"
+    },
+    "nu54-buttons": {
+      "compiled": true,
+      "elfSha256": "6db74031789b7b95d1830c0c278e9b8639a58c421bc9475efb2a408b7a2a1b2d"
+    }
+  },
+  "protocolCommit": "c8a94c4bb62d9c07f293537e087e0e664c306f4d"
+}

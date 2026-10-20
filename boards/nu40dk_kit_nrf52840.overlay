@@ -3,6 +3,11 @@
  */
 / {
     aliases {
+        controller-button-1 = &btn0;
+        controller-button-2 = &btn1;
+        controller-button-3 = &btn2;
+        controller-button-4 = &btn3;
+
         racket-confirm = &btn0;
         racket-start = &btn1;
         racket-pause = &btn2;
